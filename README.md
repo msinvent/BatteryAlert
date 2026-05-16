@@ -1,4 +1,4 @@
-# ⚡ Battery Siren Alert — Android App
+# ⚡ Battery Alert — Android App
 
 Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb.
 
@@ -81,16 +81,16 @@ BatteryAlert/
 
 After installing:
 
-1. Open **Battery Siren Alert**
+1. Open **Battery Alert**
 2. Make sure the master switch is **ON**
-3. Tap **"Grant DND Access"** → find "Battery Siren Alert" in the list → enable it
+3. Tap **"Grant DND Access"** → find "Battery Alert" in the list → enable it
 4. If prompted, grant **Notification permission** (Android 13+)
 5. The app will now run silently in the background and survive reboots
 
 ### Recommended: Disable Battery Optimization
 To prevent Android from killing the background service:
 
-- Settings → Apps → Battery Siren Alert → Battery → **Unrestricted**
+- Settings → Apps → Battery Alert → Battery → **Unrestricted**
 
 ---
 
