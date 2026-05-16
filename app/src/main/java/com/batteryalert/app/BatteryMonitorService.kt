@@ -325,6 +325,7 @@ class BatteryMonitorService : Service() {
     }
 
     private fun acquireWakeLock() {
+        releaseWakeLock()
         val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager
         wakeLock = pm?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BatteryAlert::MonitorWakeLock")
             ?.apply { acquire(10 * 60 * 1000L) }
