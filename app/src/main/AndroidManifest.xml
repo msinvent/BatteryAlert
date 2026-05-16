@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -59,6 +60,15 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BATTERY_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Auto Re-enable Receiver -->
+        <receiver
+            android:name=".AutoReenableReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.batteryalert.app.AUTO_REENABLE" />
             </intent-filter>
         </receiver>
 

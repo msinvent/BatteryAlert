@@ -1,6 +1,8 @@
 package com.batteryalert.app
 
+import android.app.AlarmManager
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -8,6 +10,8 @@ import android.content.SharedPreferences
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -17,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -33,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var reenableAlertsBtn: Button
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
+    private lateinit var autoReenableText: TextView
 
     private var puzzleX = 0
     private var puzzleY = 0
@@ -41,9 +47,24 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
 
+    private val countdownHandler = Handler(Looper.getMainLooper())
+    private val countdownRunnable = object : Runnable {
+        override fun run() {
+            if (prefs.getBoolean(KEY_ENABLED, true)) {
+                updatePuzzleUI(true)
+            } else {
+                updateCountdownText()
+                countdownHandler.postDelayed(this, 30_000L)
+            }
+        }
+    }
+
     companion object {
         const val PREFS_NAME = "BatteryAlertPrefs"
         const val KEY_ENABLED = "alerts_enabled"
+        const val KEY_REENABLE_AT = "reenable_at"
+        const val ACTION_AUTO_REENABLE = "com.batteryalert.app.AUTO_REENABLE"
+        private const val AUTO_REENABLE_DELAY_MS = 15 * 60 * 1000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         puzzleSection      = findViewById(R.id.puzzleSection)
         reenableSection    = findViewById(R.id.reenableSection)
         reenableAlertsBtn  = findViewById(R.id.reenableAlertsBtn)
+        autoReenableText   = findViewById(R.id.autoReenableText)
 
         generatePuzzle()
 
@@ -82,10 +104,17 @@ class MainActivity : AppCompatActivity() {
             val expected1dp = floor(puzzleAnswer * 10) / 10.0
             val user1dp     = floor(userAnswer * 10) / 10.0
 
-            if (Math.abs(user1dp - expected1dp) < 0.001) {
+            if (abs(user1dp - expected1dp) < 0.001) {
                 puzzleErrorText.visibility = View.GONE
                 hideKeyboard(v)
-                prefs.edit().putBoolean(KEY_ENABLED, false).apply()
+                
+                val reenableAt = System.currentTimeMillis() + AUTO_REENABLE_DELAY_MS
+                prefs.edit()
+                    .putBoolean(KEY_ENABLED, false)
+                    .putLong(KEY_REENABLE_AT, reenableAt)
+                    .apply()
+                
+                scheduleAutoReenable(reenableAt)
                 stopBatteryService()
                 updatePuzzleUI(false)
             } else {
@@ -96,7 +125,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         reenableAlertsBtn.setOnClickListener {
-            prefs.edit().putBoolean(KEY_ENABLED, true).apply()
+            prefs.edit()
+                .putBoolean(KEY_ENABLED, true)
+                .remove(KEY_REENABLE_AT)
+                .apply()
+            
+            cancelAutoReenable()
             startBatteryService()
             generatePuzzle()
             updatePuzzleUI(true)
@@ -135,11 +169,17 @@ class MainActivity : AppCompatActivity() {
             puzzleAnswerInput.setText("")
             puzzleErrorText.visibility = View.GONE
             puzzleEquationText.text = "sqrt($puzzleX × $puzzleY + $puzzleZ) = ?"
+            
+            countdownHandler.removeCallbacks(countdownRunnable)
         } else {
             statusText.text = "● DISABLED"
             statusText.setTextColor(getColor(R.color.red))
             puzzleSection.visibility = View.GONE
             reenableSection.visibility = View.VISIBLE
+            
+            updateCountdownText()
+            countdownHandler.removeCallbacks(countdownRunnable)
+            countdownHandler.postDelayed(countdownRunnable, 30_000L)
         }
     }
 
@@ -189,5 +229,47 @@ class MainActivity : AppCompatActivity() {
     private fun hideKeyboard(view: View) {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private fun updateCountdownText() {
+        val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
+        if (reenableAt == 0L) {
+            autoReenableText.text = ""
+            return
+        }
+
+        val now = System.currentTimeMillis()
+        val diff = reenableAt - now
+        if (diff > 0) {
+            val mins = (diff / 1000) / 60
+            val secs = (diff / 1000) % 60
+            autoReenableText.text = "Auto-reenabling in ${mins}m ${secs}s"
+        } else {
+            autoReenableText.text = "Auto-reenabling soon..."
+        }
+    }
+
+    private fun scheduleAutoReenable(timeMs: Long) {
+        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AutoReenableReceiver::class.java).apply {
+            action = ACTION_AUTO_REENABLE
+        }
+        val pi = PendingIntent.getBroadcast(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
+    }
+
+    private fun cancelAutoReenable() {
+        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AutoReenableReceiver::class.java).apply {
+            action = ACTION_AUTO_REENABLE
+        }
+        val pi = PendingIntent.getBroadcast(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        am.cancel(pi)
     }
 }
