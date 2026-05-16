@@ -11,6 +11,14 @@
     public static final java.lang.String *;
 }
 
+# Strip debug/verbose/info logs from release builds.
+# Log.e and Log.w are retained for crash-relevant errors.
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+}
+
 # General optimization and obfuscation
 -optimizationpasses 5
 -allowaccessmodification
