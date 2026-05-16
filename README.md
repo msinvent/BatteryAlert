@@ -121,3 +121,9 @@ To prevent Android from killing the background service:
 **Alarm fires multiple times:**
 - This shouldn't happen — each threshold fires once per discharge cycle
 - If it does, try force-stopping and reopening the app
+
+---
+
+## Credits
+
+Built with assistance from [Claude Sonnet 4.6](https://claude.ai) by Anthropic.
