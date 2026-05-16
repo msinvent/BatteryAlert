@@ -1,6 +1,6 @@
 # ⚡ Battery Alert — Android App
 
-Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb.
+Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. If you disable alerts, they automatically re-enable after 15 minutes.
 
 ## Alert Schedule
 
@@ -14,19 +14,26 @@ Each alert fires **once per discharge cycle** and resets automatically when you 
 
 ---
 
+## Features
+
+- **Loud alarm** using Android's ALARM audio channel — bypasses Do Not Disturb on most devices
+- **Vibration** with an intense siren-like pattern
+- **Full-screen alert** appears even on the lock screen
+- **Puzzle to disable** — solve a maths puzzle to turn alerts off (prevents accidental taps)
+- **Auto re-enable** — alerts automatically turn back on after 15 minutes if manually disabled
+- **Boot persistence** — service restarts automatically after device reboot
+
+---
+
 ## How DND Bypass Works
 
-The app uses **two layers** of Do Not Disturb bypass:
+The app uses two layers of Do Not Disturb bypass:
 
-1. **`AudioAttributes.USAGE_ALARM` + `FLAG_AUDIBILITY_ENFORCED`** — Android's alarm audio
-   stream bypasses DND silently mode on most devices without any special permission.
+1. **`AudioAttributes.USAGE_ALARM` + `FLAG_AUDIBILITY_ENFORCED`** — Android's alarm audio stream bypasses DND on most devices without any special permission.
 
-2. **Notification Policy Access (optional but recommended)** — If you grant DND access
-   in Settings, the app temporarily switches DND to "Alarms only" mode during the alert,
-   then restores your previous setting when done.
+2. **Notification Policy Access (optional but recommended)** — If you grant DND access in Settings, the app temporarily switches DND to "Alarms only" mode during the alert, then restores your previous setting when done.
 
-3. **`NotificationChannel.setBypassDnd(true)`** — The alert notification channel is
-   configured to bypass DND at the channel level.
+3. **`NotificationChannel.setBypassDnd(true)`** — The alert notification channel is configured to bypass DND at the channel level.
 
 ---
 
@@ -37,10 +44,11 @@ BatteryAlert/
 ├── app/src/main/
 │   ├── AndroidManifest.xml
 │   ├── java/com/batteryalert/app/
-│   │   ├── MainActivity.java          — UI, enable/disable toggle
-│   │   ├── BatteryMonitorService.java — Foreground service, siren logic, DND bypass
-│   │   ├── BootReceiver.java          — Restarts service after reboot
-│   │   └── BatteryReceiver.java       — Legacy stub
+│   │   ├── MainActivity.kt          — UI, puzzle disable/re-enable flow
+│   │   ├── BatteryMonitorService.kt — Foreground service, siren logic, DND bypass
+│   │   ├── AutoReenableReceiver.kt  — AlarmManager receiver for auto re-enable after 15 min
+│   │   ├── BootReceiver.kt          — Restarts service after reboot
+│   │   └── BatteryReceiver.kt       — Legacy stub for older Android versions
 │   └── res/
 │       ├── layout/activity_main.xml
 │       ├── values/colors.xml
@@ -57,9 +65,10 @@ BatteryAlert/
 ## Build Instructions
 
 ### Requirements
-- Android Studio Hedgehog (2023.1.1) or newer
+- Android Studio Meerkat (2024.3.1) or newer
 - JDK 17
-- Android SDK 34
+- Android SDK 37
+- Kotlin 2.2.20 (configured automatically via Gradle)
 
 ### Steps
 
@@ -82,8 +91,8 @@ BatteryAlert/
 After installing:
 
 1. Open **Battery Alert**
-2. Make sure the master switch is **ON**
-3. Tap **"Grant DND Access"** → find "Battery Alert" in the list → enable it
+2. Tap **"Grant DND Access"** → find "Battery Alert" in the list → enable it
+3. Tap **"Grant Exact Alarm Access"** → enable it for Battery Alert (required for the 15-minute auto re-enable)
 4. If prompted, grant **Notification permission** (Android 13+)
 5. The app will now run silently in the background and survive reboots
 
@@ -101,6 +110,7 @@ To prevent Android from killing the background service:
 | `FOREGROUND_SERVICE` | Keep monitoring service alive in background |
 | `RECEIVE_BOOT_COMPLETED` | Restart after device reboot |
 | `ACCESS_NOTIFICATION_POLICY` | Temporarily disable DND during alarm |
+| `SCHEDULE_EXACT_ALARM` | Fire the 15-minute auto re-enable at the right time |
 | `VIBRATE` | Vibrate during alert |
 | `WAKE_LOCK` | Keep CPU alive to detect battery events |
 | `POST_NOTIFICATIONS` | Show alert notification (Android 13+) |
@@ -112,11 +122,15 @@ To prevent Android from killing the background service:
 
 **Alarm doesn't sound through DND:**
 - Grant DND access via the in-app button
-- Some phone manufacturers (Xiaomi MIUI, Samsung One UI) have extra battery optimization — disable it for this app
+- Some manufacturers (Xiaomi MIUI, Samsung One UI) have extra battery optimization — disable it for this app
 
 **Service gets killed:**
 - Disable battery optimization for the app
 - On MIUI: Security → Battery → find the app → No restrictions
+
+**Auto re-enable doesn't fire after 15 minutes:**
+- Grant Exact Alarm access via the in-app button (Android 12+)
+- Without this permission the alarm may fire a few minutes late
 
 **Alarm fires multiple times:**
 - This shouldn't happen — each threshold fires once per discharge cycle
