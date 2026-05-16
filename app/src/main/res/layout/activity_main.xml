@@ -248,6 +248,16 @@
                 android:text="Grant DND Access"
                 android:backgroundTint="@color/accent"
                 android:textColor="@color/background"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/alarmPermissionBtn"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Grant Exact Alarm Access"
+                android:backgroundTint="@color/divider"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
         </LinearLayout>

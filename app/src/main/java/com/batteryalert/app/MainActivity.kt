@@ -137,6 +137,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.dndPermissionBtn).setOnClickListener { requestDndPermission() }
+        findViewById<View>(R.id.alarmPermissionBtn).setOnClickListener { requestAlarmPermission() }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -150,6 +151,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateUI()
+        
+        // If alerts are disabled, check if they should have been re-enabled already
+        if (!prefs.getBoolean(KEY_ENABLED, true)) {
+            val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
+            if (reenableAt != 0L && System.currentTimeMillis() >= reenableAt) {
+                prefs.edit().putBoolean(KEY_ENABLED, true).remove(KEY_REENABLE_AT).apply()
+                startBatteryService()
+                updateUI()
+            }
+        }
     }
 
     private fun generatePuzzle() {
@@ -226,6 +237,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun requestAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!am.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = android.net.Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+                Toast.makeText(this, "Please grant Exact Alarm access", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Exact Alarm access already granted!", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Not required for your Android version", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun hideKeyboard(view: View) {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow(view.windowToken, 0)
@@ -258,7 +286,17 @@ class MainActivity : AppCompatActivity() {
             this, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (am.canScheduleExactAlarms()) {
+                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
+            } else {
+                // Fallback to non-exact if permission not granted
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
+            }
+        } else {
+            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
+        }
     }
 
     private fun cancelAutoReenable() {
