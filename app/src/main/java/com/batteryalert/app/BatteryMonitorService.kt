@@ -119,7 +119,12 @@ class BatteryMonitorService : Service() {
                 }
             }
         }
-        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        // Use Context.RECEIVER_NOT_EXPORTED for internal battery monitoring on Android 14+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        }
     }
 
     private fun checkAndTriggerAlerts(batteryPct: Int) {

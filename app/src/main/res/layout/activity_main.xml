@@ -190,17 +190,6 @@
                     android:textColor="@color/subtitle"
                     android:layout_marginBottom="12dp" />
 
-                <TextView
-                    android:id="@+id/autoReenableText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="14sp"
-                    android:textColor="@color/accent"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginBottom="12dp" />
-
                 <Button
                     android:id="@+id/reenableAlertsBtn"
                     android:layout_width="match_parent"

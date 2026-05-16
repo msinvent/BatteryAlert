@@ -126,4 +126,4 @@ To prevent Android from killing the background service:
 
 ## Credits
 
-Built with assistance from [Claude Sonnet 4.6](https://claude.ai) by Anthropic.
+Built with assistance from [Claude Sonnet 4.6](https://claude.ai) and the **Android Studio AI Assistant**.

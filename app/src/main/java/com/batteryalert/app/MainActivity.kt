@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var reenableAlertsBtn: Button
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
-    private lateinit var autoReenableText: TextView
 
     private var puzzleX = 0
     private var puzzleY = 0
@@ -46,18 +45,6 @@ class MainActivity : AppCompatActivity() {
     private var puzzleAnswer = 0.0
 
     private lateinit var prefs: SharedPreferences
-
-    private val countdownHandler = Handler(Looper.getMainLooper())
-    private val countdownRunnable = object : Runnable {
-        override fun run() {
-            if (prefs.getBoolean(KEY_ENABLED, true)) {
-                updatePuzzleUI(true)
-            } else {
-                updateCountdownText()
-                countdownHandler.postDelayed(this, 30_000L)
-            }
-        }
-    }
 
     companion object {
         const val PREFS_NAME = "BatteryAlertPrefs"
@@ -83,7 +70,6 @@ class MainActivity : AppCompatActivity() {
         puzzleSection      = findViewById(R.id.puzzleSection)
         reenableSection    = findViewById(R.id.reenableSection)
         reenableAlertsBtn  = findViewById(R.id.reenableAlertsBtn)
-        autoReenableText   = findViewById(R.id.autoReenableText)
 
         generatePuzzle()
 
@@ -180,17 +166,11 @@ class MainActivity : AppCompatActivity() {
             puzzleAnswerInput.setText("")
             puzzleErrorText.visibility = View.GONE
             puzzleEquationText.text = "sqrt($puzzleX × $puzzleY + $puzzleZ) = ?"
-            
-            countdownHandler.removeCallbacks(countdownRunnable)
         } else {
             statusText.text = "● DISABLED"
             statusText.setTextColor(getColor(R.color.red))
             puzzleSection.visibility = View.GONE
             reenableSection.visibility = View.VISIBLE
-            
-            updateCountdownText()
-            countdownHandler.removeCallbacks(countdownRunnable)
-            countdownHandler.postDelayed(countdownRunnable, 30_000L)
         }
     }
 
@@ -257,24 +237,6 @@ class MainActivity : AppCompatActivity() {
     private fun hideKeyboard(view: View) {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
-    private fun updateCountdownText() {
-        val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
-        if (reenableAt == 0L) {
-            autoReenableText.text = ""
-            return
-        }
-
-        val now = System.currentTimeMillis()
-        val diff = reenableAt - now
-        if (diff > 0) {
-            val mins = (diff / 1000) / 60
-            val secs = (diff / 1000) % 60
-            autoReenableText.text = "Auto-reenabling in ${mins}m ${secs}s"
-        } else {
-            autoReenableText.text = "Auto-reenabling soon..."
-        }
     }
 
     private fun scheduleAutoReenable(timeMs: Long) {
