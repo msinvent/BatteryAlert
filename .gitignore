@@ -1,0 +1,35 @@
+# Built output
+build/
+app/build/
+.gradle/
+
+# Local configuration (machine-specific paths, SDK location)
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+captures/
+
+# Keystore / signing (never commit these)
+*.jks
+*.keystore
+release/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Proguard generated files
+*.ap_
+*.dex
+
+# Lint
+lint/
+
+# Kotlin
+**/*.kotlin_builtins
+**/*.kotlin_module

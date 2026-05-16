@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚡ BATTERY"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="@color/accent"
+            android:layout_marginTop="32dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SIREN ALERT"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Alarm when battery is critically low"
+            android:textSize="14sp"
+            android:textColor="@color/subtitle"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Battery Level Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="24dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CURRENT BATTERY"
+                android:textSize="12sp"
+                android:textColor="@color/subtitle"
+                android:letterSpacing="0.15" />
+
+            <TextView
+                android:id="@+id/batteryLevelText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textSize="64sp"
+                android:textStyle="bold"
+                android:textColor="@color/accent" />
+
+        </LinearLayout>
+
+        <!-- Puzzle / Disable Card -->
+        <LinearLayout
+            android:id="@+id/puzzleCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="20dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Status row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Alerts"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/statusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="● ACTIVE"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/green" />
+
+            </LinearLayout>
+
+            <!-- ── PUZZLE SECTION (shown when alerts are enabled) ── -->
+            <LinearLayout
+                android:id="@+id/puzzleSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SOLVE TO DISABLE ALERTS"
+                    android:textSize="11sp"
+                    android:textColor="@color/subtitle"
+                    android:letterSpacing="0.12"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:id="@+id/puzzleEquationText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="sqrt(? × ? + ?) = ?"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/accent"
+                    android:layout_marginBottom="14dp" />
+
+                <EditText
+                    android:id="@+id/puzzleAnswerInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Enter answer (1 decimal, e.g. 367.3)"
+                    android:inputType="numberDecimal"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/subtitle"
+                    android:background="@null"
+                    android:paddingBottom="8dp"
+                    android:layout_marginBottom="4dp" />
+
+                <!-- Thin divider under input -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:id="@+id/puzzleErrorText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✗ Incorrect — try again"
+                    android:textSize="13sp"
+                    android:textColor="@color/red"
+                    android:visibility="gone"
+                    android:layout_marginBottom="10dp" />
+
+                <Button
+                    android:id="@+id/disableAlertsBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="DISABLE ALERTS"
+                    android:backgroundTint="@color/red"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- ── RE-ENABLE SECTION (shown when alerts are disabled) ── -->
+            <LinearLayout
+                android:id="@+id/reenableSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Alerts are currently off. Tap below to resume monitoring."
+                    android:textSize="13sp"
+                    android:textColor="@color/subtitle"
+                    android:layout_marginBottom="12dp" />
+
+                <Button
+                    android:id="@+id/reenableAlertsBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="RE-ENABLE ALERTS"
+                    android:backgroundTint="@color/green"
+                    android:textColor="@color/background"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- DND Permission Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="20dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Do Not Disturb Override"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/dndStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Checking..."
+                android:textSize="13sp"
+                android:textColor="@color/subtitle"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/dndPermissionBtn"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Grant DND Access"
+                android:backgroundTint="@color/accent"
+                android:textColor="@color/background"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Alert Schedule Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="20dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ALERT SCHEDULE"
+                android:textSize="12sp"
+                android:textColor="@color/subtitle"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 20% row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🔋 20% Battery"
+                    android:textSize="16sp"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="30 sec siren"
+                    android:textSize="14sp"
+                    android:textColor="@color/yellow"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/divider" android:layout_marginBottom="12dp"/>
+
+            <!-- 15% row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🪫 15% Battery"
+                    android:textSize="16sp"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 min siren"
+                    android:textSize="14sp"
+                    android:textColor="@color/orange"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/divider" android:layout_marginBottom="12dp"/>
+
+            <!-- 10% row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="💀 10% Battery"
+                    android:textSize="16sp"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 min siren"
+                    android:textSize="14sp"
+                    android:textColor="@color/red"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Note -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ℹ️ Each alert fires once per discharge cycle and resets when you charge above 22%. The alarm uses Android's ALARM audio channel which bypasses Do Not Disturb by default."
+            android:textSize="12sp"
+            android:textColor="@color/subtitle"
+            android:layout_marginBottom="32dp"
+            android:lineSpacingMultiplier="1.4" />
+
+    </LinearLayout>
+</ScrollView>
