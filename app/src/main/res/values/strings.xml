@@ -1,4 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Battery Alert</string>
+
+    <!-- Header & General -->
+    <string name="header_battery">⚡ BATTERY</string>
+    <string name="current_battery_label">CURRENT BATTERY</string>
+    <string name="battery_level_format">%1$d%%</string>
+    <string name="puzzle_equation_format">sqrt(%1$d × %2$d + %3$d) = ?</string>
+    <string name="status_active">● ACTIVE</string>
+    <string name="status_disabled">● DISABLED</string>
+    <string name="info_note">ℹ️ Resets when you charge above 22%. Alarm bypasses Do Not Disturb.</string>
+
+    <!-- Puzzle Section -->
+    <string name="alerts_label">Alerts</string>
+    <string name="solve_to_disable">SOLVE TO DISABLE ALERTS</string>
+    <string name="puzzle_hint">Enter answer</string>
+    <string name="error_please_enter">✗ Please enter an answer</string>
+    <string name="error_invalid_number">✗ Invalid number — enter e.g. 367.3</string>
+    <string name="error_incorrect">✗ Incorrect — try again</string>
+    <string name="btn_disable_alerts">DISABLE ALERTS</string>
+
+    <!-- Re-enable Section -->
+    <string name="alerts_off_message">Alerts are currently off.</string>
+    <string name="btn_reenable_alerts">RE-ENABLE ALERTS</string>
+
+    <!-- Permissions Section -->
+    <string name="permissions_label">Permissions</string>
+    <string name="dnd_granted">✓ Do Not Disturb Override: GRANTED</string>
+    <string name="dnd_not_granted">✗ Do Not Disturb Override: NOT GRANTED — Tap to grant</string>
+    <string name="btn_dnd">DND</string>
+    <string name="btn_alarm">ALARM</string>
+    <string name="toast_dnd_access">Please grant Do Not Disturb access for Battery Alert</string>
+    <string name="toast_dnd_already_granted">DND access already granted!</string>
+    <string name="toast_alarm_access">Please grant Exact Alarm access</string>
+    <string name="toast_alarm_already_granted">Exact Alarm access already granted!</string>
+    <string name="toast_alarm_not_required">Not required for your Android version</string>
+
+    <!-- Schedule Section -->
+    <string name="schedule_label">SCHEDULE</string>
+    <string name="battery_20">🔋 20% Battery</string>
+    <string name="battery_15">🪫 15% Battery</string>
+    <string name="battery_10">💀 10% Battery</string>
+    <string name="siren_30s">30s siren</string>
+    <string name="siren_1m">1m siren</string>
 </resources>

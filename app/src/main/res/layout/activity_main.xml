@@ -9,35 +9,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
+        android:padding="16dp"
         android:gravity="center_horizontal">
 
         <!-- Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⚡ BATTERY"
-            android:textSize="36sp"
-            android:textStyle="bold"
-            android:textColor="@color/accent"
-            android:layout_marginTop="32dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SIREN ALERT"
-            android:textSize="36sp"
+            android:text="@string/header_battery"
+            android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Alarm when battery is critically low"
-            android:textSize="14sp"
-            android:textColor="@color/subtitle"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp" />
 
         <!-- Battery Level Card -->
         <LinearLayout
@@ -45,16 +29,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="24dp"
-            android:layout_marginBottom="16dp"
+            android:padding="16dp"
+            android:layout_marginBottom="8dp"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CURRENT BATTERY"
-                android:textSize="12sp"
-                android:textColor="@color/subtitle"
+                android:text="@string/current_battery_label"
+                android:textSize="11sp"
+                android:textColor="@color/white"
                 android:letterSpacing="0.15" />
 
             <TextView
@@ -62,9 +46,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="--"
-                android:textSize="64sp"
+                android:textSize="48sp"
                 android:textStyle="bold"
-                android:textColor="@color/accent" />
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -75,8 +59,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
 
             <!-- Status row -->
             <LinearLayout
@@ -84,14 +68,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="12dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Alerts"
-                    android:textSize="18sp"
+                    android:text="@string/alerts_label"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/white" />
 
@@ -99,8 +83,8 @@
                     android:id="@+id/statusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="● ACTIVE"
-                    android:textSize="13sp"
+                    android:text="@string/status_active"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="@color/green" />
 
@@ -117,9 +101,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SOLVE TO DISABLE ALERTS"
+                    android:text="@string/solve_to_disable"
                     android:textSize="11sp"
-                    android:textColor="@color/subtitle"
+                    android:textColor="@color/white"
                     android:letterSpacing="0.12"
                     android:layout_marginBottom="10dp" />
 
@@ -128,48 +112,48 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="sqrt(? × ? + ?) = ?"
-                    android:textSize="22sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/accent"
-                    android:layout_marginBottom="14dp" />
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="10dp" />
 
                 <EditText
                     android:id="@+id/puzzleAnswerInput"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="Enter answer (1 decimal, e.g. 367.3)"
+                    android:layout_height="40dp"
+                    android:hint="@string/puzzle_hint"
                     android:inputType="numberDecimal"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/subtitle"
                     android:background="@null"
-                    android:paddingBottom="8dp"
-                    android:layout_marginBottom="4dp" />
+                    android:paddingBottom="4dp"
+                    android:layout_marginBottom="2dp" />
 
                 <!-- Thin divider under input -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/puzzleErrorText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✗ Incorrect — try again"
-                    android:textSize="13sp"
+                    android:text="@string/error_incorrect"
+                    android:textSize="12sp"
                     android:textColor="@color/red"
                     android:visibility="gone"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/disableAlertsBtn"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="DISABLE ALERTS"
-                    android:backgroundTint="@color/red"
-                    android:textColor="@color/white"
+                    android:layout_height="44dp"
+                    android:text="@string/btn_disable_alerts"
+                    android:backgroundTint="@color/green"
+                    android:textColor="@color/black"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -185,38 +169,38 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Alerts are currently off. Tap below to resume monitoring."
-                    android:textSize="13sp"
-                    android:textColor="@color/subtitle"
-                    android:layout_marginBottom="12dp" />
+                    android:text="@string/alerts_off_message"
+                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/reenableAlertsBtn"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="RE-ENABLE ALERTS"
+                    android:layout_height="44dp"
+                    android:text="@string/btn_reenable_alerts"
                     android:backgroundTint="@color/green"
-                    android:textColor="@color/background"
+                    android:textColor="@color/black"
                     android:textStyle="bold" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- DND Permission Card -->
+        <!-- Permissions Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Do Not Disturb Override"
-                android:textSize="18sp"
+                android:text="@string/permissions_label"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/white"
                 android:layout_marginBottom="4dp" />
@@ -226,28 +210,40 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Checking..."
-                android:textSize="13sp"
-                android:textColor="@color/subtitle"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/dndPermissionBtn"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Grant DND Access"
-                android:backgroundTint="@color/accent"
-                android:textColor="@color/background"
-                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/white"
                 android:layout_marginBottom="8dp" />
 
-            <Button
-                android:id="@+id/alarmPermissionBtn"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Grant Exact Alarm Access"
-                android:backgroundTint="@color/divider"
-                android:textColor="@color/white"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/dndPermissionBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="@string/btn_dnd"
+                    android:backgroundTint="@color/accent"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/alarmPermissionBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="@string/btn_alarm"
+                    android:backgroundTint="@color/divider"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -257,71 +253,71 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ALERT SCHEDULE"
-                android:textSize="12sp"
-                android:textColor="@color/subtitle"
+                android:text="@string/schedule_label"
+                android:textSize="11sp"
+                android:textColor="@color/white"
                 android:letterSpacing="0.15"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="8dp" />
 
             <!-- 20% row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_vertical">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="🔋 20% Battery"
-                    android:textSize="16sp"
+                    android:text="@string/battery_20"
+                    android:textSize="14sp"
                     android:textColor="@color/white" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="30 sec siren"
-                    android:textSize="14sp"
-                    android:textColor="@color/yellow"
+                    android:text="@string/siren_30s"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Divider -->
             <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/divider" android:layout_marginBottom="12dp"/>
+                android:background="@color/divider" android:layout_marginBottom="8dp"/>
 
             <!-- 15% row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_vertical">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="🪫 15% Battery"
-                    android:textSize="16sp"
+                    android:text="@string/battery_15"
+                    android:textSize="14sp"
                     android:textColor="@color/white" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1 min siren"
-                    android:textSize="14sp"
-                    android:textColor="@color/orange"
+                    android:text="@string/siren_1m"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Divider -->
             <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/divider" android:layout_marginBottom="12dp"/>
+                android:background="@color/divider" android:layout_marginBottom="8dp"/>
 
             <!-- 10% row -->
             <LinearLayout
@@ -333,15 +329,15 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="💀 10% Battery"
-                    android:textSize="16sp"
+                    android:text="@string/battery_10"
+                    android:textSize="14sp"
                     android:textColor="@color/white" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1 min siren"
-                    android:textSize="14sp"
-                    android:textColor="@color/red"
+                    android:text="@string/siren_1m"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -351,11 +347,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ℹ️ Each alert fires once per discharge cycle and resets when you charge above 22%. The alarm uses Android's ALARM audio channel which bypasses Do Not Disturb by default."
-            android:textSize="12sp"
-            android:textColor="@color/subtitle"
-            android:layout_marginBottom="32dp"
-            android:lineSpacingMultiplier="1.4" />
+            android:text="@string/info_note"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
 </ScrollView>

@@ -1,5 +1,6 @@
 package com.batteryalert.app
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -25,6 +26,8 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.sqrt
 import kotlin.random.Random
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 class MainActivity : AppCompatActivity() {
 
@@ -76,13 +79,13 @@ class MainActivity : AppCompatActivity() {
         disableAlertsBtn.setOnClickListener { v ->
             val input = puzzleAnswerInput.text.toString().trim()
             if (input.isEmpty()) {
-                puzzleErrorText.text = "✗ Please enter an answer"
+                puzzleErrorText.text = getString(R.string.error_please_enter)
                 puzzleErrorText.visibility = View.VISIBLE
                 return@setOnClickListener
             }
 
             val userAnswer = input.toDoubleOrNull() ?: run {
-                puzzleErrorText.text = "✗ Invalid number — enter e.g. 367.3"
+                puzzleErrorText.text = getString(R.string.error_invalid_number)
                 puzzleErrorText.visibility = View.VISIBLE
                 return@setOnClickListener
             }
@@ -95,26 +98,26 @@ class MainActivity : AppCompatActivity() {
                 hideKeyboard(v)
                 
                 val reenableAt = System.currentTimeMillis() + AUTO_REENABLE_DELAY_MS
-                prefs.edit()
-                    .putBoolean(KEY_ENABLED, false)
-                    .putLong(KEY_REENABLE_AT, reenableAt)
-                    .apply()
+                prefs.edit {
+                    putBoolean(KEY_ENABLED, false)
+                        .putLong(KEY_REENABLE_AT, reenableAt)
+                }
                 
                 scheduleAutoReenable(reenableAt)
                 stopBatteryService()
                 updatePuzzleUI(false)
             } else {
-                puzzleErrorText.text = "✗ Incorrect — try again"
+                puzzleErrorText.text = getString(R.string.error_incorrect)
                 puzzleErrorText.visibility = View.VISIBLE
                 puzzleAnswerInput.selectAll()
             }
         }
 
         reenableAlertsBtn.setOnClickListener {
-            prefs.edit()
-                .putBoolean(KEY_ENABLED, true)
-                .remove(KEY_REENABLE_AT)
-                .apply()
+            prefs.edit {
+                putBoolean(KEY_ENABLED, true)
+                    .remove(KEY_REENABLE_AT)
+            }
             
             cancelAutoReenable()
             startBatteryService()
@@ -142,7 +145,7 @@ class MainActivity : AppCompatActivity() {
         if (!prefs.getBoolean(KEY_ENABLED, true)) {
             val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
             if (reenableAt != 0L && System.currentTimeMillis() >= reenableAt) {
-                prefs.edit().putBoolean(KEY_ENABLED, true).remove(KEY_REENABLE_AT).apply()
+                prefs.edit { putBoolean(KEY_ENABLED, true).remove(KEY_REENABLE_AT) }
                 startBatteryService()
                 updateUI()
             }
@@ -154,20 +157,21 @@ class MainActivity : AppCompatActivity() {
         puzzleY = 1000 + Random.nextInt(9000)
         puzzleZ = 1000 + Random.nextInt(9000)
         puzzleAnswer = sqrt((puzzleX.toLong() * puzzleY + puzzleZ).toDouble())
-        puzzleEquationText.text = "sqrt($puzzleX × $puzzleY + $puzzleZ) = ?"
+        puzzleEquationText.text = getString(R.string.puzzle_equation_format, puzzleX, puzzleY, puzzleZ)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updatePuzzleUI(alertsEnabled: Boolean) {
         if (alertsEnabled) {
-            statusText.text = "● ACTIVE"
+            statusText.text = getString(R.string.status_active)
             statusText.setTextColor(getColor(R.color.green))
             puzzleSection.visibility = View.VISIBLE
             reenableSection.visibility = View.GONE
             puzzleAnswerInput.setText("")
             puzzleErrorText.visibility = View.GONE
-            puzzleEquationText.text = "sqrt($puzzleX × $puzzleY + $puzzleZ) = ?"
+            puzzleEquationText.text = getString(R.string.puzzle_equation_format, puzzleX, puzzleY, puzzleZ)
         } else {
-            statusText.text = "● DISABLED"
+            statusText.text = getString(R.string.status_disabled)
             statusText.setTextColor(getColor(R.color.red))
             puzzleSection.visibility = View.GONE
             reenableSection.visibility = View.VISIBLE
@@ -179,15 +183,15 @@ class MainActivity : AppCompatActivity() {
         batteryStatus?.let {
             val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-            batteryLevelText.text = "${(level / scale.toFloat() * 100).toInt()}%"
+            batteryLevelText.text = getString(R.string.battery_level_format, (level / scale.toFloat() * 100).toInt())
         }
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         if (nm?.isNotificationPolicyAccessGranted == true) {
-            dndStatusText.text = "✓ Do Not Disturb Override: GRANTED"
+            dndStatusText.text = getString(R.string.dnd_granted)
             dndStatusText.setTextColor(getColor(R.color.green))
         } else {
-            dndStatusText.text = "✗ Do Not Disturb Override: NOT GRANTED — Tap to grant"
+            dndStatusText.text = getString(R.string.dnd_not_granted)
             dndStatusText.setTextColor(getColor(R.color.red))
         }
 
@@ -196,11 +200,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startBatteryService() {
         val serviceIntent = Intent(this, BatteryMonitorService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
+        startForegroundService(serviceIntent)
     }
 
     private fun stopBatteryService() {
@@ -211,9 +211,9 @@ class MainActivity : AppCompatActivity() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         if (nm != null && !nm.isNotificationPolicyAccessGranted) {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
-            Toast.makeText(this, "Please grant Do Not Disturb access for Battery Alert", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_dnd_access), Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(this, "DND access already granted!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_dnd_already_granted), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -222,15 +222,15 @@ class MainActivity : AppCompatActivity() {
             val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!am.canScheduleExactAlarms()) {
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                    data = android.net.Uri.parse("package:$packageName")
+                    data = "package:$packageName".toUri()
                 }
                 startActivity(intent)
-                Toast.makeText(this, "Please grant Exact Alarm access", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_alarm_access), Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(this, "Exact Alarm access already granted!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_alarm_already_granted), Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(this, "Not required for your Android version", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_alarm_not_required), Toast.LENGTH_SHORT).show()
         }
     }
 
