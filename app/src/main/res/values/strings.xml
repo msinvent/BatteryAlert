@@ -22,6 +22,7 @@
 
     <!-- Re-enable Section -->
     <string name="alerts_off_message">Alerts are currently off.</string>
+    <string name="reenable_time_format">Monitoring will automatically resume at %1$s</string>
     <string name="btn_reenable_alerts">RE-ENABLE ALERTS</string>
 
     <!-- Permissions Section -->

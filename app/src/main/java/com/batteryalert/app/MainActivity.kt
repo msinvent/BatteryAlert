@@ -22,6 +22,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.sqrt
@@ -39,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var puzzleSection: LinearLayout
     private lateinit var reenableSection: LinearLayout
     private lateinit var reenableAlertsBtn: Button
+    private lateinit var autoReenableTimeText: TextView
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
 
@@ -73,6 +77,7 @@ class MainActivity : AppCompatActivity() {
         puzzleSection      = findViewById(R.id.puzzleSection)
         reenableSection    = findViewById(R.id.reenableSection)
         reenableAlertsBtn  = findViewById(R.id.reenableAlertsBtn)
+        autoReenableTimeText = findViewById(R.id.autoReenableTimeText)
 
         generatePuzzle()
 
@@ -175,6 +180,15 @@ class MainActivity : AppCompatActivity() {
             statusText.setTextColor(getColor(R.color.red))
             puzzleSection.visibility = View.GONE
             reenableSection.visibility = View.VISIBLE
+            
+            val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
+            if (reenableAt != 0L) {
+                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(reenableAt))
+                autoReenableTimeText.text = getString(R.string.reenable_time_format, timeStr)
+                autoReenableTimeText.visibility = View.VISIBLE
+            } else {
+                autoReenableTimeText.visibility = View.GONE
+            }
         }
     }
 
