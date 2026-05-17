@@ -40,9 +40,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var puzzleErrorText: TextView
     private lateinit var disableAlertsBtn: Button
     private lateinit var puzzleSection: LinearLayout
-    private lateinit var reenableSection: LinearLayout
-    private lateinit var reenableAlertsBtn: Button
-    private lateinit var autoReenableTimeText: TextView
+    private lateinit var resumeSection: LinearLayout
+    private lateinit var resumeAlertsBtn: Button
+    private lateinit var resumeTimeText: TextView
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
 
@@ -56,9 +56,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val PREFS_NAME = "BatteryAlertPrefs"
         const val KEY_ENABLED = "alerts_enabled"
-        const val KEY_REENABLE_AT = "reenable_at"
-        const val ACTION_AUTO_REENABLE = "com.batteryalert.app.AUTO_REENABLE"
-        private const val AUTO_REENABLE_DELAY_MS = 15 * 60 * 1000L
+        const val KEY_RESUME_AT = "resume_at"
+        const val ACTION_AUTO_RESUME = "com.batteryalert.app.AUTO_RESUME"
+        private const val AUTO_RESUME_DELAY_MS = 15 * 60 * 1000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,9 +75,9 @@ class MainActivity : AppCompatActivity() {
         puzzleErrorText    = findViewById(R.id.puzzleErrorText)
         disableAlertsBtn   = findViewById(R.id.disableAlertsBtn)
         puzzleSection      = findViewById(R.id.puzzleSection)
-        reenableSection    = findViewById(R.id.reenableSection)
-        reenableAlertsBtn  = findViewById(R.id.reenableAlertsBtn)
-        autoReenableTimeText = findViewById(R.id.autoReenableTimeText)
+        resumeSection      = findViewById(R.id.resumeSection)
+        resumeAlertsBtn    = findViewById(R.id.resumeAlertsBtn)
+        resumeTimeText     = findViewById(R.id.resumeTimeText)
 
         generatePuzzle()
 
@@ -102,13 +102,13 @@ class MainActivity : AppCompatActivity() {
                 puzzleErrorText.visibility = View.GONE
                 hideKeyboard(v)
                 
-                val reenableAt = System.currentTimeMillis() + AUTO_REENABLE_DELAY_MS
+                val resumeAt = System.currentTimeMillis() + AUTO_RESUME_DELAY_MS
                 prefs.edit {
                     putBoolean(KEY_ENABLED, false)
-                        .putLong(KEY_REENABLE_AT, reenableAt)
+                        .putLong(KEY_RESUME_AT, resumeAt)
                 }
                 
-                scheduleAutoReenable(reenableAt)
+                scheduleAutoResume(resumeAt)
                 stopBatteryService()
                 updatePuzzleUI(false)
             } else {
@@ -118,13 +118,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        reenableAlertsBtn.setOnClickListener {
+        resumeAlertsBtn.setOnClickListener {
             prefs.edit {
                 putBoolean(KEY_ENABLED, true)
-                    .remove(KEY_REENABLE_AT)
+                    .remove(KEY_RESUME_AT)
             }
             
-            cancelAutoReenable()
+            cancelAutoResume()
             startBatteryService()
             generatePuzzle()
             updatePuzzleUI(true)
@@ -146,11 +146,11 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         updateUI()
         
-        // If alerts are disabled, check if they should have been re-enabled already
+        // If alerts are disabled, check if they should have been resumed already
         if (!prefs.getBoolean(KEY_ENABLED, true)) {
-            val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
-            if (reenableAt != 0L && System.currentTimeMillis() >= reenableAt) {
-                prefs.edit { putBoolean(KEY_ENABLED, true).remove(KEY_REENABLE_AT) }
+            val resumeAt = prefs.getLong(KEY_RESUME_AT, 0L)
+            if (resumeAt != 0L && System.currentTimeMillis() >= resumeAt) {
+                prefs.edit { putBoolean(KEY_ENABLED, true).remove(KEY_RESUME_AT) }
                 startBatteryService()
                 updateUI()
             }
@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity() {
             statusText.text = getString(R.string.status_active)
             statusText.setTextColor(getColor(R.color.green))
             puzzleSection.visibility = View.VISIBLE
-            reenableSection.visibility = View.GONE
+            resumeSection.visibility = View.GONE
             puzzleAnswerInput.setText("")
             puzzleErrorText.visibility = View.GONE
             puzzleEquationText.text = getString(R.string.puzzle_equation_format, puzzleX, puzzleY, puzzleZ)
@@ -179,15 +179,15 @@ class MainActivity : AppCompatActivity() {
             statusText.text = getString(R.string.status_disabled)
             statusText.setTextColor(getColor(R.color.red))
             puzzleSection.visibility = View.GONE
-            reenableSection.visibility = View.VISIBLE
+            resumeSection.visibility = View.VISIBLE
             
-            val reenableAt = prefs.getLong(KEY_REENABLE_AT, 0L)
-            if (reenableAt != 0L) {
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(reenableAt))
-                autoReenableTimeText.text = getString(R.string.reenable_time_format, timeStr)
-                autoReenableTimeText.visibility = View.VISIBLE
+            val resumeAt = prefs.getLong(KEY_RESUME_AT, 0L)
+            if (resumeAt != 0L) {
+                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(resumeAt))
+                resumeTimeText.text = getString(R.string.resume_time_format, timeStr)
+                resumeTimeText.visibility = View.VISIBLE
             } else {
-                autoReenableTimeText.visibility = View.GONE
+                resumeTimeText.visibility = View.GONE
             }
         }
     }
@@ -253,10 +253,10 @@ class MainActivity : AppCompatActivity() {
             ?.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun scheduleAutoReenable(timeMs: Long) {
+    private fun scheduleAutoResume(timeMs: Long) {
         val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, AutoReenableReceiver::class.java).apply {
-            action = ACTION_AUTO_REENABLE
+        val intent = Intent(this, AutoResumeReceiver::class.java).apply {
+            action = ACTION_AUTO_RESUME
         }
         val pi = PendingIntent.getBroadcast(
             this, 0, intent,
@@ -275,10 +275,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun cancelAutoReenable() {
+    private fun cancelAutoResume() {
         val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, AutoReenableReceiver::class.java).apply {
-            action = ACTION_AUTO_REENABLE
+        val intent = Intent(this, AutoResumeReceiver::class.java).apply {
+            action = ACTION_AUTO_RESUME
         }
         val pi = PendingIntent.getBroadcast(
             this, 0, intent,

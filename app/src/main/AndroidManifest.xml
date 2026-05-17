@@ -64,9 +64,9 @@
             </intent-filter>
         </receiver>
 
-        <!-- Auto Re-enable Receiver -->
+        <!-- Auto Resume Receiver -->
         <receiver
-            android:name=".AutoReenableReceiver"
+            android:name=".AutoResumeReceiver"
             android:exported="false" />
 
     </application>

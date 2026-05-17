@@ -1,6 +1,6 @@
 # ⚡ Battery Alert — Android App
 
-Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. If you disable alerts, they automatically re-enable after 15 minutes.
+Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. If you disable alerts, they automatically resume after 15 minutes.
 
 ## Alert Schedule
 
@@ -20,7 +20,7 @@ Each alert fires **once per discharge cycle** and resets automatically when you 
 - **Vibration** with an intense siren-like pattern
 - **Full-screen alert** appears even on the lock screen
 - **Puzzle to disable** — solve a maths puzzle to turn alerts off (prevents accidental taps)
-- **Auto re-enable** — alerts automatically turn back on after 15 minutes if manually disabled
+- **Auto resume** — alerts automatically turn back on after 15 minutes if manually disabled
 - **Boot persistence** — service restarts automatically after device reboot
 
 ---
@@ -44,9 +44,9 @@ BatteryAlert/
 ├── app/src/main/
 │   ├── AndroidManifest.xml
 │   ├── java/com/batteryalert/app/
-│   │   ├── MainActivity.kt          — UI, puzzle disable/re-enable flow
+│   │   ├── MainActivity.kt          — UI, puzzle disable/resume flow
 │   │   ├── BatteryMonitorService.kt — Foreground service, siren logic, DND bypass
-│   │   ├── AutoReenableReceiver.kt  — AlarmManager receiver for auto re-enable after 15 min
+│   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume after 15 min
 │   │   ├── BootReceiver.kt          — Restarts service after reboot
 │   │   └── BatteryReceiver.kt       — Legacy stub for older Android versions
 │   └── res/
@@ -92,7 +92,7 @@ After installing:
 
 1. Open **Battery Alert**
 2. Tap **"Grant DND Access"** → find "Battery Alert" in the list → enable it
-3. Tap **"Grant Exact Alarm Access"** → enable it for Battery Alert (required for the 15-minute auto re-enable)
+3. Tap **"Grant Exact Alarm Access"** → enable it for Battery Alert (required for the 15-minute auto resume)
 4. If prompted, grant **Notification permission** (Android 13+)
 5. The app will now run silently in the background and survive reboots
 
@@ -110,7 +110,7 @@ To prevent Android from killing the background service:
 | `FOREGROUND_SERVICE` | Keep monitoring service alive in background |
 | `RECEIVE_BOOT_COMPLETED` | Restart after device reboot |
 | `ACCESS_NOTIFICATION_POLICY` | Temporarily disable DND during alarm |
-| `SCHEDULE_EXACT_ALARM` | Fire the 15-minute auto re-enable at the right time |
+| `SCHEDULE_EXACT_ALARM` | Fire the 15-minute auto resume at the right time |
 | `VIBRATE` | Vibrate during alert |
 | `WAKE_LOCK` | Keep CPU alive to detect battery events |
 | `POST_NOTIFICATIONS` | Show alert notification (Android 13+) |
@@ -128,7 +128,7 @@ To prevent Android from killing the background service:
 - Disable battery optimization for the app
 - On MIUI: Security → Battery → find the app → No restrictions
 
-**Auto re-enable doesn't fire after 15 minutes:**
+**Auto resume doesn't fire after 15 minutes:**
 - Grant Exact Alarm access via the in-app button (Android 12+)
 - Without this permission the alarm may fire a few minutes late
 

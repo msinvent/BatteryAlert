@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 
-class AutoReenableReceiver : BroadcastReceiver() {
+class AutoResumeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit()
             .putBoolean(MainActivity.KEY_ENABLED, true)
-            .remove(MainActivity.KEY_REENABLE_AT)
+            .remove(MainActivity.KEY_RESUME_AT)
             .apply()
 
         val serviceIntent = Intent(context, BatteryMonitorService::class.java)
