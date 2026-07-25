@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Battery Alert</string>
+    <string name="app_name">Battery Siren</string>
 
     <!-- Header & General -->
-    <string name="header_battery">⚡ BATTERY ALERT</string>
+    <string name="header_battery">⚡ BATTERY SIREN</string>
     <string name="current_battery_label">CURRENT BATTERY</string>
     <string name="battery_level_format">%1$d%%</string>
     <string name="status_active">● ACTIVE</string>
@@ -17,6 +17,8 @@
     <string name="btn_pause_1h">1 HR</string>
     <string name="btn_pause_2h">2 HR</string>
     <string name="btn_enable_alerts">ENABLE</string>
+    <string name="btn_theme">🎨</string>
+    <string name="theme_picker_title">App theme</string>
 
     <!-- Permissions Section -->
     <string name="permissions_label">Permissions</string>
@@ -26,7 +28,7 @@
     <string name="fsi_not_granted">✗ Full-Screen Alerts: OFF — Tap to allow</string>
     <string name="btn_dnd">DND</string>
     <string name="btn_alarm">ALARM</string>
-    <string name="toast_dnd_access">Please grant Do Not Disturb access for Battery Alert</string>
+    <string name="toast_dnd_access">Please grant Do Not Disturb access for Battery Siren</string>
     <string name="toast_dnd_already_granted">DND access already granted!</string>
     <string name="toast_alarm_access">Please grant Exact Alarm access</string>
     <string name="toast_alarm_already_granted">Exact Alarm access already granted!</string>

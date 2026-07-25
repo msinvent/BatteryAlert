@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         const val KEY_RESUME_AT = "resume_at"
         const val ACTION_AUTO_RESUME = "com.batteryalert.app.AUTO_RESUME"
         private const val KEY_ALARM_PROMPTED = "exact_alarm_prompted"
+        private const val KEY_THEME = "app_theme"
         private const val HOUR_MS = 60 * 60 * 1000L
     }
 
@@ -115,6 +116,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.dndPermissionBtn).setOnClickListener { requestDndPermission() }
         findViewById<View>(R.id.alarmPermissionBtn).setOnClickListener { requestAlarmPermission() }
         fsiStatusText.setOnClickListener { requestFullScreenIntentPermission() }
+        findViewById<Button>(R.id.themeBtn).setOnClickListener { showThemePicker() }
+        applyTheme(prefs.getInt(KEY_THEME, AppThemes.DEFAULT_INDEX))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -306,7 +309,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-        if (nm?.isNotificationPolicyAccessGranted == true) {
+        val dndOk = nm?.isNotificationPolicyAccessGranted == true
+        if (dndOk) {
             dndStatusText.text = getString(R.string.dnd_granted)
             dndStatusText.setTextColor(getColor(R.color.green))
         } else {
@@ -316,13 +320,20 @@ class MainActivity : AppCompatActivity() {
 
         // Play or the user can revoke USE_FULL_SCREEN_INTENT (targetSdk 34+);
         // without it the lock-screen alert silently degrades to a heads-up.
-        if (nm?.canUseFullScreenIntent() == true) {
+        val fsiOk = nm?.canUseFullScreenIntent() == true
+        if (fsiOk) {
             fsiStatusText.text = getString(R.string.fsi_granted)
             fsiStatusText.setTextColor(getColor(R.color.green))
         } else {
             fsiStatusText.text = getString(R.string.fsi_not_granted)
             fsiStatusText.setTextColor(getColor(R.color.red))
         }
+
+        // Setup UI earns its removal: once every permission is granted the
+        // card disappears; it comes back if any grant is revoked.
+        val alarmOk = (getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()
+        findViewById<View>(R.id.permissionsCard).visibility =
+            if (dndOk && fsiOk && alarmOk) View.GONE else View.VISIBLE
 
         updateAlertsUI(prefs.getBoolean(KEY_ENABLED, true))
     }
@@ -362,6 +373,29 @@ class MainActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, getString(R.string.toast_alarm_not_required), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun applyTheme(index: Int) {
+        val safe = index.coerceIn(0, AppThemes.ALL.size - 1)
+        val theme = AppThemes.ALL[safe]
+        AppThemes.apply(findViewById(R.id.rootFrame), theme)
+        val insets = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+        insets.isAppearanceLightStatusBars = theme.lightSystemBars
+        insets.isAppearanceLightNavigationBars = theme.lightSystemBars
+        updateUI() // reapply semantic status colours over the theme
+    }
+
+    private fun showThemePicker() {
+        val names = AppThemes.ALL.map { it.name }.toTypedArray()
+        val current = prefs.getInt(KEY_THEME, AppThemes.DEFAULT_INDEX)
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.theme_picker_title))
+            .setSingleChoiceItems(names, current) { dialog, which ->
+                prefs.edit { putInt(KEY_THEME, which) }
+                applyTheme(which)
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun requestFullScreenIntentPermission() {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
@@ -28,6 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:tag="card"
             android:background="@drawable/card_background"
             android:padding="10dp"
             android:layout_marginBottom="6dp"
@@ -70,11 +72,13 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal">
 
-                    <!-- Permissions Card -->
+                    <!-- Permissions Card (hidden once every permission is granted) -->
             <LinearLayout
+                android:id="@+id/permissionsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:tag="card"
                 android:background="@drawable/card_background"
                 android:padding="10dp"
                 android:layout_marginBottom="6dp">
@@ -90,6 +94,7 @@
 
                 <TextView
                     android:id="@+id/dndStatusText"
+                    android:tag="textSemantic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Checking..."
@@ -99,6 +104,7 @@
 
                 <TextView
                     android:id="@+id/fsiStatusText"
+                    android:tag="textSemantic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Checking..."
@@ -113,6 +119,7 @@
 
                     <Button
                         android:id="@+id/dndPermissionBtn"
+                        android:tag="btnAccent"
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_weight="1"
@@ -125,6 +132,7 @@
 
                     <Button
                         android:id="@+id/alarmPermissionBtn"
+                        android:tag="btnAccent"
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_weight="1"
@@ -144,6 +152,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:tag="card"
                 android:background="@drawable/card_background"
                 android:padding="16dp"
                 android:layout_marginBottom="8dp">
@@ -161,6 +170,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/schedule_hint"
+                    android:tag="textSecondary"
                     android:textSize="10sp"
                     android:textColor="@color/subtitle"
                     android:layout_marginBottom="8dp" />
@@ -200,6 +210,7 @@
                         android:layout_marginEnd="12dp" />
                     <Button
                         android:id="@+id/sirenHighBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="88dp"
                         android:layout_height="36dp"
                         android:backgroundTint="@color/divider"
@@ -210,6 +221,7 @@
 
                 <!-- Divider -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:tag="divider"
                     android:background="@color/divider" android:layout_marginBottom="8dp"/>
 
                 <!-- Second alert row -->
@@ -247,6 +259,7 @@
                         android:layout_marginEnd="12dp" />
                     <Button
                         android:id="@+id/sirenMidBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="88dp"
                         android:layout_height="36dp"
                         android:backgroundTint="@color/divider"
@@ -257,6 +270,7 @@
 
                 <!-- Divider -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:tag="divider"
                     android:background="@color/divider" android:layout_marginBottom="8dp"/>
 
                 <!-- Final alert row -->
@@ -294,6 +308,7 @@
                         android:layout_marginEnd="12dp" />
                     <Button
                         android:id="@+id/sirenLowBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="88dp"
                         android:layout_height="36dp"
                         android:backgroundTint="@color/divider"
@@ -304,6 +319,7 @@
 
                 <TextView
                     android:id="@+id/thresholdErrorText"
+                    android:tag="textSemantic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/error_thresholds"
@@ -314,6 +330,7 @@
 
                 <Button
                     android:id="@+id/saveThresholdsBtn"
+                    android:tag="btnAccent"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:text="@string/btn_save_thresholds"
@@ -328,6 +345,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:tag="card"
                 android:background="@drawable/card_background"
                 android:padding="16dp"
                 android:layout_marginBottom="8dp">
@@ -359,6 +377,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/deep_sleep_hint"
+                    android:tag="textSecondary"
                     android:textSize="10sp"
                     android:textColor="@color/subtitle"
                     android:layout_marginBottom="10dp" />
@@ -379,6 +398,7 @@
 
                     <Button
                         android:id="@+id/deepSleepStartBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
@@ -398,6 +418,7 @@
 
                     <Button
                         android:id="@+id/deepSleepEndBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
@@ -416,6 +437,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:tag="cardAlt"
                 android:background="@drawable/card_background"
                 android:backgroundTint="@color/divider"
                 android:padding="10dp"
@@ -440,6 +462,7 @@
 
                     <TextView
                         android:id="@+id/statusText"
+                        android:tag="textSemantic"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/status_active"
@@ -456,6 +479,7 @@
 
                     <Button
                         android:id="@+id/pause30mBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="0dp"
                         android:layout_height="38dp"
                         android:layout_weight="1"
@@ -468,6 +492,7 @@
 
                     <Button
                         android:id="@+id/pause1hBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="0dp"
                         android:layout_height="38dp"
                         android:layout_weight="1"
@@ -481,6 +506,7 @@
 
                     <Button
                         android:id="@+id/pause2hBtn"
+                        android:tag="btnNeutral"
                         android:layout_width="0dp"
                         android:layout_height="38dp"
                         android:layout_weight="1"
@@ -498,6 +524,7 @@
             <!-- Note -->
             <TextView
                 android:id="@+id/infoNoteText"
+                android:tag="textSecondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10sp"
@@ -537,5 +564,20 @@
             android:textStyle="bold" />
 
     </FrameLayout>
+
+    <!-- Theme picker: always on top, both states -->
+    <Button
+        android:id="@+id/themeBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="34dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:minWidth="0dp"
+        android:paddingHorizontal="12dp"
+        android:text="@string/btn_theme"
+        android:backgroundTint="#66000000"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:textStyle="bold" />
 
 </FrameLayout>

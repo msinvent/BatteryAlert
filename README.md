@@ -1,4 +1,6 @@
-# ⚡ Battery Alert — Android App
+# ⚡ Battery Siren — Android App
+
+> Formerly "Battery Alert" — renamed for Play Store distinctiveness (repo and package id unchanged).
 
 Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. Alerts can be paused for 30 minutes, 1 hour, or 2 hours and resume automatically.
 
@@ -25,6 +27,7 @@ above the first threshold + 2% (22% with defaults). Saving new thresholds re-arm
 - **Full-screen alert** appears even on the lock screen
 - **Pause alerts** — one tap pauses alerts for 30 minutes, 1 hour, or 2 hours; they resume automatically. While paused the whole app turns red with a single circular ENABLE button (header + battery level stay visible)
 - **Deep sleep window** — opt-in mute during scheduled hours (23:00–07:00 preset; midnight-crossing supported); a threshold crossed while asleep fires on the first check after the window ends
+- **Themes** — four looks (Mint Light, Cream Comfort, Deep Ocean · default, Lavender) via the 🎨 button; semantic green/red state colours stay constant across themes
 - **Boot persistence** — service restarts automatically after device reboot
 
 ---

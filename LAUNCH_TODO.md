@@ -23,7 +23,7 @@ Security + policy audits passed (2026-07-25); targetSdk 35, no specialUse FGS, n
 - [ ] Data Safety form: "no data collected" (true — no INTERNET permission)
 - [ ] Content rating questionnaire (~5 min, utility app)
 - [ ] Full-screen intent declaration — justification: battery alarm requiring immediate attention
-- [ ] Store listing: title (note "Battery Alert" is a crowded name — consider a distinctive one), short + full description (lead with provable privacy), 2+ phone screenshots, 512px icon, 1024×500 feature graphic
+- [ ] Store listing: title **Battery Siren** (chosen 2026-07-25), short + full description (lead with provable privacy), 2+ phone screenshots, 512px icon, 1024×500 feature graphic
 
 ## 4. Testing gate → production
 
