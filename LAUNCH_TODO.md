@@ -5,7 +5,7 @@ Security + policy audits passed (2026-07-25); targetSdk 35, no specialUse FGS, n
 
 ## 1. Code (Claude can do)
 
-- [ ] Adaptive launcher icon — mipmap adaptive-icon (foreground/background/monochrome) replacing the plain vector drawable, so launchers mask it properly and themed icons work
+- [x] Adaptive launcher icon — mipmap adaptive-icon (foreground/background/monochrome) replacing the plain vector drawable, so launchers mask it properly and themed icons work
 - [ ] Full-screen-intent fallback — runtime `canUseFullScreenIntent()` status in the Permissions card with a settings deep-link, since Play/user can revoke FSI
 
 ## 2. Build & signing (Manish — involves passwords)
