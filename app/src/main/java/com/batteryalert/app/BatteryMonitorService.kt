@@ -33,14 +33,6 @@ class BatteryMonitorService : Service() {
         private const val CHANNEL_ID_ALERT = "battery_alert_critical"
         private const val NOTIFICATION_ID_SERVICE = 1
         private const val NOTIFICATION_ID_ALERT = 2
-
-        private const val THRESHOLD_20 = 20
-        private const val THRESHOLD_15 = 15
-        private const val THRESHOLD_10 = 10
-
-        private const val DURATION_20 = 30_000L
-        private const val DURATION_15 = 60_000L
-        private const val DURATION_10 = 60_000L
     }
 
     private var batteryReceiver: BroadcastReceiver? = null
@@ -51,9 +43,7 @@ class BatteryMonitorService : Service() {
     private var vibrator: Vibrator? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
-    private var alert20Fired = false
-    private var alert15Fired = false
-    private var alert10Fired = false
+    private val decider = BatteryAlarmDecider()
     private var isAlerting = false
 
     private var previousInterruptionFilter = NotificationManager.INTERRUPTION_FILTER_UNKNOWN
@@ -106,22 +96,19 @@ class BatteryMonitorService : Service() {
                 val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
                         || status == BatteryManager.BATTERY_STATUS_FULL
 
-                if (isCharging && isAlerting) {
-                    stopAlarm()
-                    restoreDoNotDisturb()
-                    Log.d(TAG, "Charging detected — active alarm silenced")
-                }
+                val enabled = getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
+                    .getBoolean(MainActivity.KEY_ENABLED, true)
 
-                if (isCharging && batteryPct > THRESHOLD_20 + 2) {
-                    alert20Fired = false
-                    alert15Fired = false
-                    alert10Fired = false
-                    Log.d(TAG, "Charging detected — alert flags reset")
-                }
-
-                val prefs = getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
-                if (prefs.getBoolean(MainActivity.KEY_ENABLED, true) && !isCharging) {
-                    checkAndTriggerAlerts(batteryPct)
+                when (val decision = decider.onBatteryEvent(batteryPct, isCharging, enabled, isAlerting)) {
+                    is BatteryAlarmDecider.Decision.Silence -> {
+                        stopAlarm()
+                        restoreDoNotDisturb()
+                        Log.d(TAG, "Charging detected — active alarm silenced")
+                    }
+                    is BatteryAlarmDecider.Decision.Trigger -> {
+                        triggerAlert(decision.batteryPct, decision.threshold.durationMs, decision.message)
+                    }
+                    is BatteryAlarmDecider.Decision.None -> {}
                 }
             }
         }
@@ -130,24 +117,6 @@ class BatteryMonitorService : Service() {
             registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        }
-    }
-
-    private fun checkAndTriggerAlerts(batteryPct: Int) {
-        Log.d(TAG, "Battery: $batteryPct% | 20fired=$alert20Fired 15fired=$alert15Fired 10fired=$alert10Fired")
-        when {
-            batteryPct <= THRESHOLD_10 && !alert10Fired -> {
-                alert10Fired = true; alert15Fired = true; alert20Fired = true
-                triggerAlert(batteryPct, DURATION_10, "Battery below $THRESHOLD_10% (now $batteryPct%)")
-            }
-            batteryPct <= THRESHOLD_15 && !alert15Fired -> {
-                alert15Fired = true; alert20Fired = true
-                triggerAlert(batteryPct, DURATION_15, "Battery below $THRESHOLD_15% (now $batteryPct%)")
-            }
-            batteryPct <= THRESHOLD_20 && !alert20Fired -> {
-                alert20Fired = true
-                triggerAlert(batteryPct, DURATION_20, "Battery below $THRESHOLD_20% (now $batteryPct%)")
-            }
         }
     }
 
@@ -313,7 +282,7 @@ class BatteryMonitorService : Service() {
             this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val durationText = if (batteryPct <= THRESHOLD_15) "1 minute" else "30 seconds"
+        val durationText = if (batteryPct <= BatteryAlarmDecider.Threshold.LEVEL_15.percent) "1 minute" else "30 seconds"
         notificationManager.notify(NOTIFICATION_ID_ALERT,
             NotificationCompat.Builder(this, CHANNEL_ID_ALERT)
                 .setContentTitle("🔋 $message")
