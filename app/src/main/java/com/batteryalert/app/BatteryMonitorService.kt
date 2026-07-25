@@ -76,6 +76,10 @@ class BatteryMonitorService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopAlarm()
+        // The alarm's auto-stop timer normally restores DND; if the service is
+        // torn down mid-alarm that timer dies with it, which would leave the
+        // user's interruption filter locked to ALARMS.
+        restoreDoNotDisturb()
         batteryReceiver?.let {
             try { unregisterReceiver(it) } catch (_: Exception) {}
         }
@@ -227,6 +231,9 @@ class BatteryMonitorService : Service() {
                 && previousInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_UNKNOWN) {
                 notificationManager.setInterruptionFilter(previousInterruptionFilter)
                 Log.d(TAG, "DND restored to: $previousInterruptionFilter")
+                // One-shot: a second restore (e.g. onDestroy after the timer already
+                // restored) must not re-apply a stale filter over user changes.
+                previousInterruptionFilter = NotificationManager.INTERRUPTION_FILTER_UNKNOWN
             }
         } catch (e: Exception) {
             Log.e(TAG, "DND restore error: ${e.message}")
