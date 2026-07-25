@@ -27,6 +27,8 @@
     <string name="permissions_label">Permissions</string>
     <string name="dnd_granted">✓ Do Not Disturb Override: GRANTED</string>
     <string name="dnd_not_granted">✗ Do Not Disturb Override: NOT GRANTED — Tap to grant</string>
+    <string name="fsi_granted">✓ Full-Screen Alerts: ALLOWED</string>
+    <string name="fsi_not_granted">✗ Full-Screen Alerts: OFF — Tap to allow</string>
     <string name="btn_dnd">DND</string>
     <string name="btn_alarm">ALARM</string>
     <string name="toast_dnd_access">Please grant Do Not Disturb access for Battery Alert</string>

@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var resumeTimeText: TextView
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
+    private lateinit var fsiStatusText: TextView
     private lateinit var thresholdHighInput: EditText
     private lateinit var thresholdMidInput: EditText
     private lateinit var thresholdLowInput: EditText
@@ -82,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         batteryLevelText   = findViewById(R.id.batteryLevelText)
         statusText         = findViewById(R.id.statusText)
         dndStatusText      = findViewById(R.id.dndStatusText)
+        fsiStatusText      = findViewById(R.id.fsiStatusText)
         pause30mBtn        = findViewById(R.id.pause30mBtn)
         pause1hBtn         = findViewById(R.id.pause1hBtn)
         pause2hBtn         = findViewById(R.id.pause2hBtn)
@@ -122,6 +124,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.dndPermissionBtn).setOnClickListener { requestDndPermission() }
         findViewById<View>(R.id.alarmPermissionBtn).setOnClickListener { requestAlarmPermission() }
+        fsiStatusText.setOnClickListener { requestFullScreenIntentPermission() }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -336,6 +339,16 @@ class MainActivity : AppCompatActivity() {
             dndStatusText.setTextColor(getColor(R.color.red))
         }
 
+        // Play or the user can revoke USE_FULL_SCREEN_INTENT (targetSdk 34+);
+        // without it the lock-screen alert silently degrades to a heads-up.
+        if (nm?.canUseFullScreenIntent() == true) {
+            fsiStatusText.text = getString(R.string.fsi_granted)
+            fsiStatusText.setTextColor(getColor(R.color.green))
+        } else {
+            fsiStatusText.text = getString(R.string.fsi_not_granted)
+            fsiStatusText.setTextColor(getColor(R.color.red))
+        }
+
         updateAlertsUI(prefs.getBoolean(KEY_ENABLED, true))
     }
 
@@ -374,6 +387,14 @@ class MainActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, getString(R.string.toast_alarm_not_required), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun requestFullScreenIntentPermission() {
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        if (nm?.canUseFullScreenIntent() == true) return
+        startActivity(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+            data = "package:$packageName".toUri()
+        })
     }
 
     private fun hideKeyboard(view: View) {
