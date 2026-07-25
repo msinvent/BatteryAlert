@@ -12,6 +12,9 @@ data class DeepSleepWindow(
     val endMinutes: Int
 ) {
 
+    fun isValid(): Boolean =
+        startMinutes in 0 until MINUTES_PER_DAY && endMinutes in 0 until MINUTES_PER_DAY
+
     fun contains(minutesOfDay: Int): Boolean {
         if (!enabled || startMinutes == endMinutes) return false
         return if (startMinutes < endMinutes) {
@@ -24,6 +27,7 @@ data class DeepSleepWindow(
 
     companion object {
         const val MINUTES_PER_HOUR = 60
+        const val MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
         val DEFAULT = DeepSleepWindow(
             enabled = false,
             startMinutes = 22 * MINUTES_PER_HOUR,

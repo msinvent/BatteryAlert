@@ -59,6 +59,15 @@
             android:name=".AutoResumeReceiver"
             android:exported="false" />
 
+        <!-- Re-bootstrap checks when exact-alarm permission is granted back -->
+        <receiver
+            android:name=".ExactAlarmPermissionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

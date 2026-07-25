@@ -45,6 +45,15 @@ class DeepSleepWindowTest {
     }
 
     @Test
+    fun `minutes outside a day are invalid`() {
+        assertFalse(DeepSleepWindow(enabled = true, startMinutes = -1, endMinutes = minutes(7)).isValid())
+        assertFalse(DeepSleepWindow(enabled = true, startMinutes = minutes(22), endMinutes = 1440).isValid())
+        assertFalse(DeepSleepWindow(enabled = true, startMinutes = 5000, endMinutes = minutes(7)).isValid())
+        assertTrue(DeepSleepWindow(enabled = true, startMinutes = 0, endMinutes = 1439).isValid())
+        assertTrue(DeepSleepWindow.DEFAULT.isValid())
+    }
+
+    @Test
     fun `default is disabled 22 to 07`() {
         val default = DeepSleepWindow.DEFAULT
         assertFalse(default.enabled)

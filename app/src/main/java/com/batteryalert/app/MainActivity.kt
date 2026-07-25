@@ -178,7 +178,13 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateUI()
-        
+
+        // Self-heal the check chain: a force-stop or exact-alarm revocation
+        // cancels the scheduled check, so every app open re-bootstraps it.
+        if (prefs.getBoolean(KEY_ENABLED, true)) {
+            BatteryCheck.runNow(this)
+        }
+
         // If alerts are disabled, check if they should have been resumed already
         if (!prefs.getBoolean(KEY_ENABLED, true)) {
             val resumeAt = prefs.getLong(KEY_RESUME_AT, 0L)

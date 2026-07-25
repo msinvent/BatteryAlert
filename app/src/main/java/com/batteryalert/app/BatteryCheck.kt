@@ -79,11 +79,12 @@ object BatteryCheck {
     fun loadDeepSleep(context: Context): DeepSleepWindow {
         val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
         val default = DeepSleepWindow.DEFAULT
-        return DeepSleepWindow(
+        val window = DeepSleepWindow(
             enabled = prefs.getBoolean(KEY_SLEEP_ENABLED, default.enabled),
             startMinutes = prefs.getInt(KEY_SLEEP_START_MIN, default.startMinutes),
             endMinutes = prefs.getInt(KEY_SLEEP_END_MIN, default.endMinutes)
         )
+        return if (window.isValid()) window else default
     }
 
     fun saveDeepSleep(context: Context, window: DeepSleepWindow) {
@@ -145,9 +146,14 @@ object BatteryCheck {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerAt = System.currentTimeMillis() + delayMs
         val pi = checkPendingIntent(context)
-        if (am.canScheduleExactAlarms()) {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
-        } else {
+        try {
+            if (am.canScheduleExactAlarms()) {
+                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+            } else {
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
+            }
+        } catch (e: SecurityException) {
+            // Exact-alarm permission revoked between the check and the call.
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
         }
     }
