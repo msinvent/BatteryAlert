@@ -213,12 +213,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startBatteryService() {
-        val serviceIntent = Intent(this, BatteryMonitorService::class.java)
-        startForegroundService(serviceIntent)
+        BatteryCheck.runNow(this)
     }
 
     private fun stopBatteryService() {
-        stopService(Intent(this, BatteryMonitorService::class.java))
+        BatteryCheck.cancel(this)
+        // Also kill an actively ringing siren.
+        stopService(Intent(this, BatteryAlarmService::class.java))
     }
 
     private fun requestDndPermission() {

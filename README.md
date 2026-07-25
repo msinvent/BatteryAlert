@@ -45,7 +45,9 @@ BatteryAlert/
 │   ├── AndroidManifest.xml
 │   ├── java/com/batteryalert/app/
 │   │   ├── MainActivity.kt          — UI, puzzle disable/resume flow
-│   │   ├── BatteryMonitorService.kt — Foreground service, siren logic, DND bypass
+│   │   ├── BatteryCheck.kt          — Scheduled battery checks (exact alarms, adaptive interval)
+│   │   ├── BatteryCheckReceiver.kt  — Alarm receiver that runs each check
+│   │   ├── BatteryAlarmService.kt   — Short-lived siren FGS (shortService), DND bypass while ringing
 │   │   ├── BatteryAlarmDecider.kt   — Pure threshold state machine (no Android deps, unit-tested)
 │   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume after 15 min
 │   │   └── BootReceiver.kt          — Restarts service after reboot
@@ -92,8 +94,8 @@ BatteryAlert/
 ## Unit Tests
 
 The alarm's decision logic lives in `BatteryAlarmDecider.kt` — a pure Kotlin class with no
-Android dependencies. It owns *when* an alarm should fire; `BatteryMonitorService` owns the
-side effects (siren, vibration, notification, DND, auto-stop timer). That split means the
+Android dependencies. It owns *when* an alarm should fire; `BatteryAlarmService` owns the
+side effects (siren, vibration, notification, DND, ring duration). That split means the
 alarm behaviour is testable on the JVM, with **no emulator or device required**.
 
 ```bash

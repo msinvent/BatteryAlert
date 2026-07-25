@@ -6,10 +6,15 @@ package com.batteryalert.app
  * Holds the "which thresholds have already fired" state and, given a battery
  * event, decides whether to trigger an alarm, silence a running one, or do
  * nothing. Kept free of any Android dependency so it can be unit-tested on the
- * JVM (see BatteryAlarmDeciderTest); BatteryMonitorService owns all the actual
- * side effects (audio, vibration, notifications, DND, the auto-stop timer).
+ * JVM (see BatteryAlarmDeciderTest); BatteryCheck runs it from scheduled
+ * checks (persisting the flags), and BatteryAlarmService owns all the actual
+ * side effects (audio, vibration, notifications, DND, the ring duration).
  */
-class BatteryAlarmDecider {
+class BatteryAlarmDecider(
+    alert20Fired: Boolean = false,
+    alert15Fired: Boolean = false,
+    alert10Fired: Boolean = false
+) {
 
     enum class Threshold(val percent: Int, val durationMs: Long) {
         LEVEL_20(20, 30_000L),
@@ -27,9 +32,14 @@ class BatteryAlarmDecider {
         object None : Decision()
     }
 
-    private var alert20Fired = false
-    private var alert15Fired = false
-    private var alert10Fired = false
+    // Exposed (read-only) so callers can persist them across process death —
+    // the checker runs from short-lived broadcasts, not a long-lived service.
+    var alert20Fired = alert20Fired
+        private set
+    var alert15Fired = alert15Fired
+        private set
+    var alert10Fired = alert10Fired
+        private set
 
     /**
      * @param isAlerting whether the service currently has an alarm playing —

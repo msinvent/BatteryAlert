@@ -5,7 +5,6 @@
     <!-- Permissions -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
@@ -34,15 +33,16 @@
             </intent-filter>
         </activity>
 
-        <!-- Battery Monitor Foreground Service -->
+        <!-- Short-lived alarm siren: rings for 30-60s when a threshold trips -->
         <service
-            android:name=".BatteryMonitorService"
+            android:name=".BatteryAlarmService"
             android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Battery monitoring alert service" />
-        </service>
+            android:foregroundServiceType="shortService" />
+
+        <!-- Scheduled battery check (fired by exact alarms) -->
+        <receiver
+            android:name=".BatteryCheckReceiver"
+            android:exported="false" />
 
         <!-- Boot Receiver to restart service after reboot -->
         <receiver

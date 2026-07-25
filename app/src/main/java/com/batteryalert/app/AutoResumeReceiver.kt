@@ -3,7 +3,6 @@ package com.batteryalert.app
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 
 class AutoResumeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -15,11 +14,6 @@ class AutoResumeReceiver : BroadcastReceiver() {
             .remove(MainActivity.KEY_RESUME_AT)
             .apply()
 
-        val serviceIntent = Intent(context, BatteryMonitorService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
-        }
+        BatteryCheck.runNow(context)
     }
 }

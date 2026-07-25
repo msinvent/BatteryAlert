@@ -3,6 +3,7 @@ package com.batteryalert.app
 import com.batteryalert.app.BatteryAlarmDecider.Decision
 import com.batteryalert.app.BatteryAlarmDecider.Threshold
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -113,6 +114,32 @@ class BatteryAlarmDeciderTest {
     fun `disabled monitoring suppresses all alarms`() {
         val quiet = decider.onBatteryEvent(9, isCharging = false, enabled = false, isAlerting = false)
         assertTrue(quiet is Decision.None)
+    }
+
+    @Test
+    fun `fired flags are exposed for persistence`() {
+        discharge(14)
+        assertTrue(decider.alert20Fired)
+        assertTrue(decider.alert15Fired)
+        assertFalse(decider.alert10Fired)
+    }
+
+    @Test
+    fun `decider restored from persisted flags does not re-alarm`() {
+        // Simulates a fresh process (scheduled check) after 20/15 already fired.
+        val restored = BatteryAlarmDecider(alert20Fired = true, alert15Fired = true)
+        assertTrue(restored.onBatteryEvent(13, isCharging = false, enabled = true, isAlerting = false) is Decision.None)
+        val critical = restored.onBatteryEvent(9, isCharging = false, enabled = true, isAlerting = false)
+        assertEquals(Threshold.LEVEL_10, (critical as Decision.Trigger).threshold)
+    }
+
+    @Test
+    fun `restored decider re-arms after charging above the margin`() {
+        val restored = BatteryAlarmDecider(alert20Fired = true, alert15Fired = true, alert10Fired = true)
+        restored.onBatteryEvent(30, isCharging = true, enabled = true, isAlerting = false)
+        assertFalse(restored.alert20Fired)
+        assertFalse(restored.alert15Fired)
+        assertFalse(restored.alert10Fired)
     }
 
     @Test
