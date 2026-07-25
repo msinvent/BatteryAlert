@@ -243,8 +243,8 @@
                     android:layout_height="36dp"
                     android:layout_weight="1"
                     android:text="@string/btn_alarm"
-                    android:backgroundTint="@color/divider"
-                    android:textColor="@color/white"
+                    android:backgroundTint="@color/accent"
+                    android:textColor="@color/black"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:layout_marginStart="4dp" />
