@@ -30,15 +30,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="8dp"
+            android:padding="10dp"
+            android:layout_marginBottom="6dp"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/current_battery_label"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textColor="@color/white"
                 android:letterSpacing="0.15" />
 
@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="--"
-                android:textSize="48sp"
+                android:textSize="34sp"
                 android:textStyle="bold"
                 android:textColor="@color/white" />
 
@@ -60,8 +60,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="8dp">
+            android:padding="10dp"
+            android:layout_marginBottom="6dp">
 
             <!-- Status row -->
             <LinearLayout
@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -106,7 +106,7 @@
                     android:textSize="11sp"
                     android:textColor="@color/white"
                     android:letterSpacing="0.12"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -116,7 +116,7 @@
                     <Button
                         android:id="@+id/pause30mBtn"
                         android:layout_width="0dp"
-                        android:layout_height="44dp"
+                        android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="@string/btn_pause_30m"
                         android:backgroundTint="@color/green"
@@ -128,7 +128,7 @@
                     <Button
                         android:id="@+id/pause1hBtn"
                         android:layout_width="0dp"
-                        android:layout_height="44dp"
+                        android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="@string/btn_pause_1h"
                         android:backgroundTint="@color/green"
@@ -141,7 +141,7 @@
                     <Button
                         android:id="@+id/pause2hBtn"
                         android:layout_width="0dp"
-                        android:layout_height="44dp"
+                        android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="@string/btn_pause_2h"
                         android:backgroundTint="@color/green"
@@ -199,17 +199,17 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="8dp">
+            android:padding="10dp"
+            android:layout_marginBottom="6dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/permissions_label"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/white"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="2dp" />
 
             <TextView
                 android:id="@+id/dndStatusText"
@@ -218,7 +218,7 @@
                 android:text="Checking..."
                 android:textSize="12sp"
                 android:textColor="@color/white"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="6dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -228,7 +228,7 @@
                 <Button
                     android:id="@+id/dndPermissionBtn"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:text="@string/btn_dnd"
                     android:backgroundTint="@color/accent"
@@ -240,7 +240,7 @@
                 <Button
                     android:id="@+id/alarmPermissionBtn"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:text="@string/btn_alarm"
                     android:backgroundTint="@color/divider"
