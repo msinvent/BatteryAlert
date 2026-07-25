@@ -4,13 +4,17 @@ Blares a loud siren when your battery hits critical thresholds, bypassing Do Not
 
 ## Alert Schedule
 
-| Battery Level | Siren Duration |
-|---------------|----------------|
-| 20%           | 30 seconds     |
-| 15%           | 1 minute       |
-| 10%           | 1 minute       |
+Three thresholds, **configurable in the app** (defaults below). Each must sit at least
+**5% below** the previous one, within 5–95%. Siren length per alert: 15s / 30s / 45s / 60s.
 
-Each alert fires **once per discharge cycle** and resets automatically when you charge above 22%.
+| Alert  | Default Level | Default Siren |
+|--------|---------------|---------------|
+| First  | 20%           | 30 seconds    |
+| Second | 15%           | 1 minute      |
+| Final  | 10%           | 1 minute      |
+
+Each alert fires **once per discharge cycle** and resets automatically when you charge
+above the first threshold + 2% (22% with defaults). Saving new thresholds re-arms all alerts.
 
 ---
 
@@ -49,6 +53,7 @@ BatteryAlert/
 │   │   ├── BatteryCheckReceiver.kt  — Alarm receiver that runs each check
 │   │   ├── BatteryAlarmService.kt   — Short-lived siren FGS (shortService), DND bypass while ringing
 │   │   ├── BatteryAlarmDecider.kt   — Pure threshold state machine (no Android deps, unit-tested)
+│   │   ├── ThresholdConfig.kt       — User thresholds + siren lengths, validation (pure, unit-tested)
 │   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume after 15 min
 │   │   └── BootReceiver.kt          — Restarts service after reboot
 │   └── res/

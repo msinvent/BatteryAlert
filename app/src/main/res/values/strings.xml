@@ -9,7 +9,7 @@
     <string name="puzzle_equation_format">sqrt(%1$d × %2$d + %3$d) = ?</string>
     <string name="status_active">● ACTIVE</string>
     <string name="status_disabled">● DISABLED</string>
-    <string name="info_note">ℹ️ Resets when you charge above 22%. Alarm bypasses Do Not Disturb.</string>
+    <string name="info_note_format">ℹ️ Resets when you charge above %1$d%%. Alarm bypasses Do Not Disturb.</string>
 
     <!-- Puzzle Section -->
     <string name="alerts_label">Alerts</string>
@@ -38,10 +38,14 @@
     <string name="toast_alarm_not_required">Not required for your Android version</string>
 
     <!-- Schedule Section -->
-    <string name="schedule_label">SCHEDULE</string>
-    <string name="battery_20">🔋 20% Battery</string>
-    <string name="battery_15">🪫 15% Battery</string>
-    <string name="battery_10">💀 10% Battery</string>
-    <string name="siren_30s">30s siren</string>
-    <string name="siren_1m">1m siren</string>
+    <string name="schedule_label">ALERT THRESHOLDS</string>
+    <string name="schedule_hint">Tap a siren button to cycle 15s → 30s → 45s → 60s</string>
+    <string name="threshold_first_label">🔋 First alert</string>
+    <string name="threshold_second_label">🪫 Second alert</string>
+    <string name="threshold_third_label">💀 Final alert</string>
+    <string name="percent_suffix">%</string>
+    <string name="siren_length_format">%1$ds siren</string>
+    <string name="error_thresholds">✗ Use 5–95%%, descending, at least 5%% apart</string>
+    <string name="btn_save_thresholds">SAVE THRESHOLDS</string>
+    <string name="toast_thresholds_saved">Thresholds updated — alerts re-armed</string>
 </resources>

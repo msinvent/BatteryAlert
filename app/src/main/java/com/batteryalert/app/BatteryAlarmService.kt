@@ -39,7 +39,8 @@ class BatteryAlarmService : Service() {
         private const val VOLUME_UNSAVED = -1
         private const val WAKELOCK_EXTRA_MS = 5_000L
         private const val DEFAULT_DURATION_MS = 30_000L
-        private const val LONG_RING_THRESHOLD_MS = 60_000L
+        private const val MS_PER_MINUTE = 60_000L
+        private const val MS_PER_SEC = 1_000L
 
         const val EXTRA_BATTERY_PCT = "battery_pct"
         const val EXTRA_DURATION_MS = "duration_ms"
@@ -244,7 +245,8 @@ class BatteryAlarmService : Service() {
             this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val durationText = if (durationMs >= LONG_RING_THRESHOLD_MS) "1 minute" else "30 seconds"
+        val durationText =
+            if (durationMs >= MS_PER_MINUTE) "1 minute" else "${durationMs / MS_PER_SEC} seconds"
         return NotificationCompat.Builder(this, CHANNEL_ID_ALERT)
             .setContentTitle("🔋 $message")
             .setContentText("Alarm will sound for $durationText. Charge your device NOW!")

@@ -11,21 +11,20 @@ package com.batteryalert.app
  * side effects (audio, vibration, notifications, DND, the ring duration).
  */
 class BatteryAlarmDecider(
-    alert20Fired: Boolean = false,
-    alert15Fired: Boolean = false,
-    alert10Fired: Boolean = false
+    private val config: ThresholdConfig = ThresholdConfig.DEFAULT,
+    highFired: Boolean = false,
+    midFired: Boolean = false,
+    lowFired: Boolean = false
 ) {
 
-    enum class Threshold(val percent: Int, val durationMs: Long) {
-        LEVEL_20(20, 30_000L),
-        LEVEL_15(15, 60_000L),
-        LEVEL_10(10, 60_000L)
-    }
-
     sealed class Decision {
-        /** Sound the alarm for [threshold] at the given live [batteryPct]. */
-        data class Trigger(val threshold: Threshold, val batteryPct: Int) : Decision() {
-            val message: String get() = "Battery below ${threshold.percent}% (now $batteryPct%)"
+        /** Sound the alarm: [thresholdPercent] tripped at the given live [batteryPct]. */
+        data class Trigger(
+            val thresholdPercent: Int,
+            val batteryPct: Int,
+            val durationMs: Long
+        ) : Decision() {
+            val message: String get() = "Battery below $thresholdPercent% (now $batteryPct%)"
         }
         /** Charger connected while an alarm is active — stop it immediately. */
         object Silence : Decision()
@@ -34,16 +33,16 @@ class BatteryAlarmDecider(
 
     // Exposed (read-only) so callers can persist them across process death —
     // the checker runs from short-lived broadcasts, not a long-lived service.
-    var alert20Fired = alert20Fired
+    var highFired = highFired
         private set
-    var alert15Fired = alert15Fired
+    var midFired = midFired
         private set
-    var alert10Fired = alert10Fired
+    var lowFired = lowFired
         private set
 
     /**
-     * @param isAlerting whether the service currently has an alarm playing —
-     *   the service owns the playback/timer lifecycle, so it passes this in.
+     * @param isAlerting whether an alarm is currently playing — the caller
+     *   owns the playback lifecycle, so it passes this in.
      */
     fun onBatteryEvent(
         batteryPct: Int,
@@ -52,8 +51,8 @@ class BatteryAlarmDecider(
         isAlerting: Boolean
     ): Decision {
         // Only re-arm thresholds once safely above the top threshold, so a phone
-        // hovering right at 20% doesn't chirp on every tiny charge/discharge wobble.
-        if (isCharging && batteryPct > Threshold.LEVEL_20.percent + RESET_MARGIN) {
+        // hovering right at it doesn't chirp on every tiny charge/discharge wobble.
+        if (isCharging && batteryPct > config.high + RESET_MARGIN) {
             resetFlags()
         }
         if (isCharging && isAlerting) {
@@ -66,28 +65,29 @@ class BatteryAlarmDecider(
     }
 
     private fun evaluate(batteryPct: Int): Decision = when {
-        batteryPct <= Threshold.LEVEL_10.percent && !alert10Fired -> {
-            alert10Fired = true; alert15Fired = true; alert20Fired = true
-            Decision.Trigger(Threshold.LEVEL_10, batteryPct)
+        batteryPct <= config.low && !lowFired -> {
+            lowFired = true; midFired = true; highFired = true
+            Decision.Trigger(config.low, batteryPct, config.lowSirenSec * MS_PER_SEC)
         }
-        batteryPct <= Threshold.LEVEL_15.percent && !alert15Fired -> {
-            alert15Fired = true; alert20Fired = true
-            Decision.Trigger(Threshold.LEVEL_15, batteryPct)
+        batteryPct <= config.mid && !midFired -> {
+            midFired = true; highFired = true
+            Decision.Trigger(config.mid, batteryPct, config.midSirenSec * MS_PER_SEC)
         }
-        batteryPct <= Threshold.LEVEL_20.percent && !alert20Fired -> {
-            alert20Fired = true
-            Decision.Trigger(Threshold.LEVEL_20, batteryPct)
+        batteryPct <= config.high && !highFired -> {
+            highFired = true
+            Decision.Trigger(config.high, batteryPct, config.highSirenSec * MS_PER_SEC)
         }
         else -> Decision.None
     }
 
     private fun resetFlags() {
-        alert20Fired = false
-        alert15Fired = false
-        alert10Fired = false
+        highFired = false
+        midFired = false
+        lowFired = false
     }
 
     companion object {
-        private const val RESET_MARGIN = 2
+        const val RESET_MARGIN = 2
+        private const val MS_PER_SEC = 1_000L
     }
 }

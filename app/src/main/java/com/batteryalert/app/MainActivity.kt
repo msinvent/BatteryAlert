@@ -45,6 +45,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var resumeTimeText: TextView
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
+    private lateinit var thresholdHighInput: EditText
+    private lateinit var thresholdMidInput: EditText
+    private lateinit var thresholdLowInput: EditText
+    private lateinit var thresholdErrorText: TextView
+    private lateinit var sirenHighBtn: Button
+    private lateinit var sirenMidBtn: Button
+    private lateinit var sirenLowBtn: Button
+    private lateinit var infoNoteText: TextView
+
+    private var sirenHighSec = 0
+    private var sirenMidSec = 0
+    private var sirenLowSec = 0
 
     private var puzzleX = 0
     private var puzzleY = 0
@@ -78,7 +90,16 @@ class MainActivity : AppCompatActivity() {
         resumeSection      = findViewById(R.id.resumeSection)
         resumeAlertsBtn    = findViewById(R.id.resumeAlertsBtn)
         resumeTimeText     = findViewById(R.id.resumeTimeText)
+        thresholdHighInput = findViewById(R.id.thresholdHighInput)
+        thresholdMidInput  = findViewById(R.id.thresholdMidInput)
+        thresholdLowInput  = findViewById(R.id.thresholdLowInput)
+        thresholdErrorText = findViewById(R.id.thresholdErrorText)
+        sirenHighBtn       = findViewById(R.id.sirenHighBtn)
+        sirenMidBtn        = findViewById(R.id.sirenMidBtn)
+        sirenLowBtn        = findViewById(R.id.sirenLowBtn)
+        infoNoteText       = findViewById(R.id.infoNoteText)
 
+        setupThresholdEditor()
         generatePuzzle()
 
         disableAlertsBtn.setOnClickListener { v ->
@@ -155,6 +176,61 @@ class MainActivity : AppCompatActivity() {
                 updateUI()
             }
         }
+    }
+
+    private fun setupThresholdEditor() {
+        val config = BatteryCheck.loadConfig(this)
+        thresholdHighInput.setText(config.high.toString())
+        thresholdMidInput.setText(config.mid.toString())
+        thresholdLowInput.setText(config.low.toString())
+        sirenHighSec = config.highSirenSec
+        sirenMidSec = config.midSirenSec
+        sirenLowSec = config.lowSirenSec
+        refreshSirenButtons()
+        updateInfoNote(config)
+
+        sirenHighBtn.setOnClickListener {
+            sirenHighSec = ThresholdConfig.nextSirenChoice(sirenHighSec)
+            refreshSirenButtons()
+        }
+        sirenMidBtn.setOnClickListener {
+            sirenMidSec = ThresholdConfig.nextSirenChoice(sirenMidSec)
+            refreshSirenButtons()
+        }
+        sirenLowBtn.setOnClickListener {
+            sirenLowSec = ThresholdConfig.nextSirenChoice(sirenLowSec)
+            refreshSirenButtons()
+        }
+
+        findViewById<Button>(R.id.saveThresholdsBtn).setOnClickListener { v ->
+            val high = thresholdHighInput.text.toString().toIntOrNull()
+            val mid = thresholdMidInput.text.toString().toIntOrNull()
+            val low = thresholdLowInput.text.toString().toIntOrNull()
+            val newConfig = if (high != null && mid != null && low != null) {
+                ThresholdConfig(high, mid, low, sirenHighSec, sirenMidSec, sirenLowSec)
+            } else null
+
+            if (newConfig == null || !newConfig.isValid()) {
+                thresholdErrorText.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+            thresholdErrorText.visibility = View.GONE
+            hideKeyboard(v)
+            BatteryCheck.saveConfig(this, newConfig)
+            updateInfoNote(newConfig)
+            Toast.makeText(this, getString(R.string.toast_thresholds_saved), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun refreshSirenButtons() {
+        sirenHighBtn.text = getString(R.string.siren_length_format, sirenHighSec)
+        sirenMidBtn.text = getString(R.string.siren_length_format, sirenMidSec)
+        sirenLowBtn.text = getString(R.string.siren_length_format, sirenLowSec)
+    }
+
+    private fun updateInfoNote(config: ThresholdConfig) {
+        infoNoteText.text =
+            getString(R.string.info_note_format, config.high + BatteryAlarmDecider.RESET_MARGIN)
     }
 
     private fun generatePuzzle() {

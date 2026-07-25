@@ -274,9 +274,17 @@
                 android:textSize="11sp"
                 android:textColor="@color/white"
                 android:letterSpacing="0.15"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/schedule_hint"
+                android:textSize="10sp"
+                android:textColor="@color/subtitle"
                 android:layout_marginBottom="8dp" />
 
-            <!-- 20% row -->
+            <!-- First alert row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -287,15 +295,35 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/battery_20"
+                    android:text="@string/threshold_first_label"
                     android:textSize="14sp"
                     android:textColor="@color/white" />
+                <EditText
+                    android:id="@+id/thresholdHighInput"
+                    android:layout_width="44dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@null"
+                    android:importantForAutofill="no" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/siren_30s"
-                    android:textSize="13sp"
+                    android:text="@string/percent_suffix"
+                    android:textSize="14sp"
                     android:textColor="@color/white"
+                    android:layout_marginEnd="12dp" />
+                <Button
+                    android:id="@+id/sirenHighBtn"
+                    android:layout_width="88dp"
+                    android:layout_height="36dp"
+                    android:backgroundTint="@color/divider"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -303,7 +331,7 @@
             <View android:layout_width="match_parent" android:layout_height="1dp"
                 android:background="@color/divider" android:layout_marginBottom="8dp"/>
 
-            <!-- 15% row -->
+            <!-- Second alert row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -314,15 +342,35 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/battery_15"
+                    android:text="@string/threshold_second_label"
                     android:textSize="14sp"
                     android:textColor="@color/white" />
+                <EditText
+                    android:id="@+id/thresholdMidInput"
+                    android:layout_width="44dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@null"
+                    android:importantForAutofill="no" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/siren_1m"
-                    android:textSize="13sp"
+                    android:text="@string/percent_suffix"
+                    android:textSize="14sp"
                     android:textColor="@color/white"
+                    android:layout_marginEnd="12dp" />
+                <Button
+                    android:id="@+id/sirenMidBtn"
+                    android:layout_width="88dp"
+                    android:layout_height="36dp"
+                    android:backgroundTint="@color/divider"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -330,35 +378,75 @@
             <View android:layout_width="match_parent" android:layout_height="1dp"
                 android:background="@color/divider" android:layout_marginBottom="8dp"/>
 
-            <!-- 10% row -->
+            <!-- Final alert row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:layout_marginBottom="8dp"
                 android:gravity="center_vertical">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/battery_10"
+                    android:text="@string/threshold_third_label"
                     android:textSize="14sp"
                     android:textColor="@color/white" />
+                <EditText
+                    android:id="@+id/thresholdLowInput"
+                    android:layout_width="44dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@null"
+                    android:importantForAutofill="no" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/siren_1m"
-                    android:textSize="13sp"
+                    android:text="@string/percent_suffix"
+                    android:textSize="14sp"
                     android:textColor="@color/white"
+                    android:layout_marginEnd="12dp" />
+                <Button
+                    android:id="@+id/sirenLowBtn"
+                    android:layout_width="88dp"
+                    android:layout_height="36dp"
+                    android:backgroundTint="@color/divider"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/thresholdErrorText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/error_thresholds"
+                android:textSize="12sp"
+                android:textColor="@color/red"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/saveThresholdsBtn"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="@string/btn_save_thresholds"
+                android:backgroundTint="@color/accent"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
         <!-- Note -->
         <TextView
+            android:id="@+id/infoNoteText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/info_note"
             android:textSize="10sp"
             android:textColor="@color/white"
             android:layout_marginBottom="16dp" />
