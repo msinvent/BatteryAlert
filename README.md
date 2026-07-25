@@ -46,6 +46,7 @@ BatteryAlert/
 │   ├── java/com/batteryalert/app/
 │   │   ├── MainActivity.kt          — UI, puzzle disable/resume flow
 │   │   ├── BatteryMonitorService.kt — Foreground service, siren logic, DND bypass
+│   │   ├── BatteryAlarmDecider.kt   — Pure threshold state machine (no Android deps, unit-tested)
 │   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume after 15 min
 │   │   ├── BootReceiver.kt          — Restarts service after reboot
 │   │   └── BatteryReceiver.kt       — Legacy stub for older Android versions
@@ -55,6 +56,9 @@ BatteryAlert/
 │       ├── values/strings.xml
 │       ├── values/styles.xml
 │       └── drawable/
+├── app/src/test/
+│   └── java/com/batteryalert/app/
+│       └── BatteryAlarmDeciderTest.kt — JVM tests: charge/discharge alarm behaviour
 ├── build.gradle
 ├── settings.gradle
 └── gradle.properties
@@ -83,6 +87,48 @@ BatteryAlert/
    ./gradlew installDebug
    ```
    Or use **Run ▶** in Android Studio with a connected device/emulator.
+
+---
+
+## Unit Tests
+
+The alarm's decision logic lives in `BatteryAlarmDecider.kt` — a pure Kotlin class with no
+Android dependencies. It owns *when* an alarm should fire; `BatteryMonitorService` owns the
+side effects (siren, vibration, notification, DND, auto-stop timer). That split means the
+alarm behaviour is testable on the JVM, with **no emulator or device required**.
+
+```bash
+./gradlew testDebugUnitTest
+```
+
+HTML report: `app/build/reports/tests/testDebugUnitTest/index.html`
+
+The tests emulate a phone charging and discharging by feeding sequences of battery levels
+into the decider and asserting which alarms fire:
+
+| Scenario | Expected behaviour |
+|---|---|
+| Discharge 100% → 21% | No alarm |
+| Slow discharge 100% → 1% | 20%, 15%, 10% each fire **once**, in order |
+| Crossing 20%, then ticking down | Only the 20% alarm — silent on every tick below |
+| Sudden drop 25% → 16% (no tick at 20%) | 20% alarm fires, reported at the level actually seen |
+| Drop straight to 8% | Only the 10% alarm — no back-fill for 20%/15% |
+| Any level while charging | No alarm |
+| Charger plugged in mid-alarm | Alarm silenced immediately |
+| Charger plugged in, nothing playing | No-op |
+| Charge back above 22% | Thresholds re-arm for the next cycle |
+| Brief charge to ≤ 22% | Does **not** re-arm (avoids chirping at the boundary) |
+| Monitoring disabled | All alarms suppressed |
+| Full charge → discharge cycle | Alarms fire again, once per cycle |
+
+### Why an alarm at 16% is not a false alarm
+
+Each threshold fires at-or-below its level, once per discharge cycle. If the battery drops
+past 20% before Android broadcasts an update, the **20% alarm fires the first time it sees
+you under 20** — which can be at 16%. The alert message names both the threshold and the
+live level to make this obvious:
+
+> 🔋 Battery below 20% (now 16%)
 
 ---
 
@@ -140,4 +186,4 @@ To prevent Android from killing the background service:
 
 ## Credits
 
-Built with assistance from [Claude Sonnet 4.6](https://claude.ai) and the **Android Studio AI Assistant**.
+Built with assistance from [Claude](https://claude.ai) and the **Android Studio AI Assistant**.
