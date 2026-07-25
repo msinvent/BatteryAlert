@@ -54,15 +54,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Battery Change Receiver -->
-        <receiver
-            android:name=".BatteryReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BATTERY_CHANGED" />
-            </intent-filter>
-        </receiver>
-
         <!-- Auto Resume Receiver -->
         <receiver
             android:name=".AutoResumeReceiver"

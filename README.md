@@ -48,8 +48,7 @@ BatteryAlert/
 │   │   ├── BatteryMonitorService.kt — Foreground service, siren logic, DND bypass
 │   │   ├── BatteryAlarmDecider.kt   — Pure threshold state machine (no Android deps, unit-tested)
 │   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume after 15 min
-│   │   ├── BootReceiver.kt          — Restarts service after reboot
-│   │   └── BatteryReceiver.kt       — Legacy stub for older Android versions
+│   │   └── BootReceiver.kt          — Restarts service after reboot
 │   └── res/
 │       ├── layout/activity_main.xml
 │       ├── values/colors.xml
