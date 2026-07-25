@@ -24,6 +24,7 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         const val KEY_ENABLED = "alerts_enabled"
         const val KEY_RESUME_AT = "resume_at"
         const val ACTION_AUTO_RESUME = "com.batteryalert.app.AUTO_RESUME"
+        private const val KEY_ALARM_PROMPTED = "exact_alarm_prompted"
         private const val HOUR_MS = 60 * 60 * 1000L
     }
 
@@ -124,10 +126,27 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         }
+        maybePromptExactAlarm()
 
         if (prefs.getBoolean(KEY_ENABLED, true)) {
             startBatteryService()
         }
+    }
+
+    // SCHEDULE_EXACT_ALARM is default-denied on Android 14+; without it the
+    // check chain falls back to inexact alarms that drift in Doze. Prompt once.
+    private fun maybePromptExactAlarm() {
+        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (am.canScheduleExactAlarms()) return
+        if (prefs.getBoolean(KEY_ALARM_PROMPTED, false)) return
+        prefs.edit { putBoolean(KEY_ALARM_PROMPTED, true) }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.exact_alarm_prompt_title))
+            .setMessage(getString(R.string.exact_alarm_prompt_message))
+            .setPositiveButton(getString(R.string.exact_alarm_prompt_grant)) { _, _ -> requestAlarmPermission() }
+            .setNegativeButton(getString(R.string.exact_alarm_prompt_later), null)
+            .show()
     }
 
     override fun onResume() {

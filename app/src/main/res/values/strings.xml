@@ -34,6 +34,10 @@
     <string name="toast_alarm_access">Please grant Exact Alarm access</string>
     <string name="toast_alarm_already_granted">Exact Alarm access already granted!</string>
     <string name="toast_alarm_not_required">Not required for your Android version</string>
+    <string name="exact_alarm_prompt_title">Allow exact alarms</string>
+    <string name="exact_alarm_prompt_message">Battery checks and pause auto-resume use exact alarms. Without this permission, alert timing can drift by several minutes while the phone is idle.</string>
+    <string name="exact_alarm_prompt_grant">ALLOW</string>
+    <string name="exact_alarm_prompt_later">LATER</string>
 
     <!-- Schedule Section -->
     <string name="schedule_label">ALERT THRESHOLDS</string>
