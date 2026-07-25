@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.graphics.drawable.ColorDrawable
 import android.provider.Settings
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -271,6 +272,12 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateAlertsUI(alertsEnabled: Boolean) {
+        // Whole-screen red wash while alerts are paused — an at-a-glance
+        // "you are not protected" signal. Foreground draws over children
+        // (cards included) without touching any individual view's colors.
+        findViewById<View>(R.id.rootScroll).foreground =
+            if (alertsEnabled) null else ColorDrawable(getColor(R.color.disabled_overlay))
+
         if (alertsEnabled) {
             statusText.text = getString(R.string.status_active)
             statusText.setTextColor(getColor(R.color.green))

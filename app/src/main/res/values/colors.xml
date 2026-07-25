@@ -8,6 +8,7 @@
     <color name="subtitle">#FFFFFF</color>
     <color name="green">#10B981</color>
     <color name="red">#F43F5E</color>
+    <color name="disabled_overlay">#26F43F5E</color>
     <color name="orange">#60A5FA</color>
     <color name="yellow">#38BDF8</color>
     <color name="divider">#334155</color>
