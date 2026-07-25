@@ -14,8 +14,9 @@
     <!-- Pause Section -->
     <string name="alerts_label">Alerts</string>
     <string name="pause_label">PAUSE ALERTS</string>
-    <string name="btn_pause_1h">1 HOUR</string>
-    <string name="btn_pause_2h">2 HOURS</string>
+    <string name="btn_pause_30m">30 MIN</string>
+    <string name="btn_pause_1h">1 HR</string>
+    <string name="btn_pause_2h">2 HR</string>
 
     <!-- Re-enable Section -->
     <string name="alerts_off_message">Alerts are currently off.</string>

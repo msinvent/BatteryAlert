@@ -33,6 +33,7 @@ import androidx.core.net.toUri
 class MainActivity : AppCompatActivity() {
 
     private lateinit var statusText: TextView
+    private lateinit var pause30mBtn: Button
     private lateinit var pause1hBtn: Button
     private lateinit var pause2hBtn: Button
     private lateinit var pauseSection: LinearLayout
@@ -78,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         batteryLevelText   = findViewById(R.id.batteryLevelText)
         statusText         = findViewById(R.id.statusText)
         dndStatusText      = findViewById(R.id.dndStatusText)
+        pause30mBtn        = findViewById(R.id.pause30mBtn)
         pause1hBtn         = findViewById(R.id.pause1hBtn)
         pause2hBtn         = findViewById(R.id.pause2hBtn)
         pauseSection       = findViewById(R.id.pauseSection)
@@ -100,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         setupThresholdEditor()
         setupDeepSleepEditor()
 
+        pause30mBtn.setOnClickListener { pauseAlerts(HOUR_MS / 2) }
         pause1hBtn.setOnClickListener { pauseAlerts(1 * HOUR_MS) }
         pause2hBtn.setOnClickListener { pauseAlerts(2 * HOUR_MS) }
 

@@ -1,6 +1,6 @@
 # ⚡ Battery Alert — Android App
 
-Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. Alerts can be paused for 1 or 2 hours and resume automatically.
+Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. Alerts can be paused for 30 minutes, 1 hour, or 2 hours and resume automatically.
 
 ## Alert Schedule
 
@@ -23,7 +23,7 @@ above the first threshold + 2% (22% with defaults). Saving new thresholds re-arm
 - **Loud alarm** using Android's ALARM audio channel — bypasses Do Not Disturb on most devices
 - **Vibration** with an intense siren-like pattern
 - **Full-screen alert** appears even on the lock screen
-- **Pause alerts** — one tap pauses alerts for 1 or 2 hours; they resume automatically
+- **Pause alerts** — one tap pauses alerts for 30 minutes, 1 hour, or 2 hours; they resume automatically
 - **Deep sleep window** — mute alarms during scheduled hours (e.g. 22:00–07:00, midnight-crossing supported); a threshold crossed while asleep fires on the first check after the window ends
 - **Boot persistence** — service restarts automatically after device reboot
 

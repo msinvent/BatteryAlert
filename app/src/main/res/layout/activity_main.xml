@@ -114,6 +114,18 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/pause30mBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:text="@string/btn_pause_30m"
+                        android:backgroundTint="@color/green"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="4dp" />
+
+                    <Button
                         android:id="@+id/pause1hBtn"
                         android:layout_width="0dp"
                         android:layout_height="44dp"
@@ -121,7 +133,9 @@
                         android:text="@string/btn_pause_1h"
                         android:backgroundTint="@color/green"
                         android:textColor="@color/black"
+                        android:textSize="12sp"
                         android:textStyle="bold"
+                        android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp" />
 
                     <Button
@@ -132,6 +146,7 @@
                         android:text="@string/btn_pause_2h"
                         android:backgroundTint="@color/green"
                         android:textColor="@color/black"
+                        android:textSize="12sp"
                         android:textStyle="bold"
                         android:layout_marginStart="4dp" />
 
