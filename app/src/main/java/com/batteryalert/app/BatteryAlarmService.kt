@@ -23,6 +23,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import kotlin.math.roundToInt
 
 /**
  * Short-lived siren: started by BatteryCheck when a threshold trips, rings for
@@ -37,6 +38,7 @@ class BatteryAlarmService : Service() {
         private const val CHANNEL_ID_ALERT = "battery_alert_critical"
         private const val NOTIFICATION_ID_ALERT = 2
         private const val VOLUME_UNSAVED = -1
+        private const val ALARM_VOLUME_FRACTION = 0.9f
         private const val WAKELOCK_EXTRA_MS = 5_000L
         private const val DEFAULT_DURATION_MS = 30_000L
         private const val MS_PER_MINUTE = 60_000L
@@ -137,7 +139,10 @@ class BatteryAlarmService : Service() {
                 if (previousAlarmVolume == VOLUME_UNSAVED) {
                     previousAlarmVolume = it.getStreamVolume(AudioManager.STREAM_ALARM)
                 }
-                it.setStreamVolume(AudioManager.STREAM_ALARM, it.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0)
+                val target = (it.getStreamMaxVolume(AudioManager.STREAM_ALARM) * ALARM_VOLUME_FRACTION)
+                    .roundToInt()
+                    .coerceAtLeast(1)
+                it.setStreamVolume(AudioManager.STREAM_ALARM, target, 0)
             }
 
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
