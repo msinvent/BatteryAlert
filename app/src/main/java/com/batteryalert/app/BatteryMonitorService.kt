@@ -106,6 +106,12 @@ class BatteryMonitorService : Service() {
                 val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
                         || status == BatteryManager.BATTERY_STATUS_FULL
 
+                if (isCharging && isAlerting) {
+                    stopAlarm()
+                    restoreDoNotDisturb()
+                    Log.d(TAG, "Charging detected — active alarm silenced")
+                }
+
                 if (isCharging && batteryPct > THRESHOLD_20 + 2) {
                     alert20Fired = false
                     alert15Fired = false
