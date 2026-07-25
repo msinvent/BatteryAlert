@@ -1,7 +1,7 @@
 package com.batteryalert.app
 
 /**
- * A daily "no alarms" window, on by default 23:00-07:00. Pure and framework-free so
+ * A daily "no alarms" window (opt-in, 23:00-07:00 preset). Pure and framework-free so
  * the wrap-around-midnight logic is unit-testable; persistence lives in
  * BatteryCheck. Start is inclusive, end is exclusive. Thresholds crossed
  * during the window still fire on the first check after it ends.
@@ -28,8 +28,10 @@ data class DeepSleepWindow(
     companion object {
         const val MINUTES_PER_HOUR = 60
         const val MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
+        // Off by default: a store user must opt in to overnight silence —
+        // a low-battery app that is quiet by night would surprise them.
         val DEFAULT = DeepSleepWindow(
-            enabled = true,
+            enabled = false,
             startMinutes = 23 * MINUTES_PER_HOUR,
             endMinutes = 7 * MINUTES_PER_HOUR
         )

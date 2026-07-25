@@ -54,9 +54,9 @@ class DeepSleepWindowTest {
     }
 
     @Test
-    fun `default is enabled 23 to 07`() {
+    fun `default is disabled with a 23 to 07 preset`() {
         val default = DeepSleepWindow.DEFAULT
-        assertTrue(default.enabled)
+        assertFalse(default.enabled)
         assertTrue(default.startMinutes == 23 * 60)
         assertTrue(default.endMinutes == 7 * 60)
     }
