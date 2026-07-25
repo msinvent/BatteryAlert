@@ -33,6 +33,7 @@ class BatteryMonitorService : Service() {
         private const val CHANNEL_ID_ALERT = "battery_alert_critical"
         private const val NOTIFICATION_ID_SERVICE = 1
         private const val NOTIFICATION_ID_ALERT = 2
+        private const val VOLUME_UNSAVED = -1
     }
 
     private var batteryReceiver: BroadcastReceiver? = null
@@ -47,6 +48,7 @@ class BatteryMonitorService : Service() {
     private var isAlerting = false
 
     private var previousInterruptionFilter = NotificationManager.INTERRUPTION_FILTER_UNKNOWN
+    private var previousAlarmVolume = VOLUME_UNSAVED
 
     override fun onCreate() {
         super.onCreate()
@@ -148,6 +150,9 @@ class BatteryMonitorService : Service() {
 
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
             audioManager?.let {
+                if (previousAlarmVolume == VOLUME_UNSAVED) {
+                    previousAlarmVolume = it.getStreamVolume(AudioManager.STREAM_ALARM)
+                }
                 it.setStreamVolume(AudioManager.STREAM_ALARM, it.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0)
             }
 
@@ -192,6 +197,7 @@ class BatteryMonitorService : Service() {
     private fun stopAlarm() {
         isAlerting = false
         stopMediaPlayer()
+        restoreAlarmVolume()
         try { vibrator?.cancel() } catch (_: Exception) {}
         stopAlarmRunnable?.let {
             handler.removeCallbacks(it)
@@ -199,6 +205,17 @@ class BatteryMonitorService : Service() {
         }
         notificationManager.cancel(NOTIFICATION_ID_ALERT)
         Log.d(TAG, "Alarm stopped")
+    }
+
+    private fun restoreAlarmVolume() {
+        if (previousAlarmVolume == VOLUME_UNSAVED) return
+        try {
+            (getSystemService(Context.AUDIO_SERVICE) as? AudioManager)
+                ?.setStreamVolume(AudioManager.STREAM_ALARM, previousAlarmVolume, 0)
+        } catch (e: Exception) {
+            Log.e(TAG, "Volume restore error: ${e.message}")
+        }
+        previousAlarmVolume = VOLUME_UNSAVED
     }
 
     private fun stopMediaPlayer() {
