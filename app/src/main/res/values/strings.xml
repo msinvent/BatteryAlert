@@ -6,20 +6,16 @@
     <string name="header_battery">⚡ BATTERY ALERT</string>
     <string name="current_battery_label">CURRENT BATTERY</string>
     <string name="battery_level_format">%1$d%%</string>
-    <string name="puzzle_equation_format">sqrt(%1$d × %2$d + %3$d) = ?</string>
     <string name="status_active">● ACTIVE</string>
     <string name="status_disabled">● DISABLED</string>
     <string name="info_note_format">ℹ️ Alerts re-arm when you charge above %1$d%%. Alarm bypasses Do Not Disturb.</string>
     <string name="info_note_sleep_format">%1$s Deep sleep mutes alarms %2$02d:%3$02d–%4$02d:%5$02d.</string>
 
-    <!-- Puzzle Section -->
+    <!-- Pause Section -->
     <string name="alerts_label">Alerts</string>
-    <string name="solve_to_disable">SOLVE TO DISABLE ALERTS</string>
-    <string name="puzzle_hint">Enter answer</string>
-    <string name="error_please_enter">✗ Please enter an answer</string>
-    <string name="error_invalid_number">✗ Invalid number — enter e.g. 367.3</string>
-    <string name="error_incorrect">✗ Incorrect — try again</string>
-    <string name="btn_disable_alerts">DISABLE ALERTS</string>
+    <string name="pause_label">PAUSE ALERTS</string>
+    <string name="btn_pause_1h">1 HOUR</string>
+    <string name="btn_pause_2h">2 HOURS</string>
 
     <!-- Re-enable Section -->
     <string name="alerts_off_message">Alerts are currently off.</string>

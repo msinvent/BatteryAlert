@@ -1,6 +1,6 @@
 # ⚡ Battery Alert — Android App
 
-Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. If you disable alerts, they automatically resume after 15 minutes.
+Blares a loud siren when your battery hits critical thresholds, bypassing Do Not Disturb. Alerts can be paused for 1 or 2 hours and resume automatically.
 
 ## Alert Schedule
 
@@ -23,8 +23,7 @@ above the first threshold + 2% (22% with defaults). Saving new thresholds re-arm
 - **Loud alarm** using Android's ALARM audio channel — bypasses Do Not Disturb on most devices
 - **Vibration** with an intense siren-like pattern
 - **Full-screen alert** appears even on the lock screen
-- **Puzzle to disable** — solve a maths puzzle to turn alerts off (prevents accidental taps)
-- **Auto resume** — alerts automatically turn back on after 15 minutes if manually disabled
+- **Pause alerts** — one tap pauses alerts for 1 or 2 hours; they resume automatically
 - **Deep sleep window** — mute alarms during scheduled hours (e.g. 22:00–07:00, midnight-crossing supported); a threshold crossed while asleep fires on the first check after the window ends
 - **Boot persistence** — service restarts automatically after device reboot
 
@@ -49,7 +48,7 @@ BatteryAlert/
 ├── app/src/main/
 │   ├── AndroidManifest.xml
 │   ├── java/com/batteryalert/app/
-│   │   ├── MainActivity.kt          — UI, puzzle disable/resume flow
+│   │   ├── MainActivity.kt          — UI: pause/resume, threshold + deep sleep editors
 │   │   ├── BatteryCheck.kt          — Scheduled battery checks (exact alarms, adaptive interval)
 │   │   ├── BatteryCheckReceiver.kt  — Alarm receiver that runs each check
 │   │   ├── BatteryAlarmService.kt   — Short-lived siren FGS (shortService), DND bypass while ringing
@@ -182,7 +181,7 @@ To prevent Android from killing the background service:
 - Disable battery optimization for the app
 - On MIUI: Security → Battery → find the app → No restrictions
 
-**Auto resume doesn't fire after 15 minutes:**
+**Auto resume doesn't fire after the pause ends:**
 - Grant Exact Alarm access via the in-app button (Android 12+)
 - Without this permission the alarm may fire a few minutes late
 

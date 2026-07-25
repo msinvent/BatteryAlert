@@ -27,21 +27,15 @@ import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.floor
-import kotlin.math.sqrt
-import kotlin.random.Random
 import androidx.core.content.edit
 import androidx.core.net.toUri
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var statusText: TextView
-    private lateinit var puzzleEquationText: TextView
-    private lateinit var puzzleAnswerInput: EditText
-    private lateinit var puzzleErrorText: TextView
-    private lateinit var disableAlertsBtn: Button
-    private lateinit var puzzleSection: LinearLayout
+    private lateinit var pause1hBtn: Button
+    private lateinit var pause2hBtn: Button
+    private lateinit var pauseSection: LinearLayout
     private lateinit var resumeSection: LinearLayout
     private lateinit var resumeAlertsBtn: Button
     private lateinit var resumeTimeText: TextView
@@ -65,11 +59,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var deepSleepEndBtn: Button
     private var deepSleep = DeepSleepWindow.DEFAULT
 
-    private var puzzleX = 0
-    private var puzzleY = 0
-    private var puzzleZ = 0
-    private var puzzleAnswer = 0.0
-
     private lateinit var prefs: SharedPreferences
 
     companion object {
@@ -77,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         const val KEY_ENABLED = "alerts_enabled"
         const val KEY_RESUME_AT = "resume_at"
         const val ACTION_AUTO_RESUME = "com.batteryalert.app.AUTO_RESUME"
-        private const val AUTO_RESUME_DELAY_MS = 15 * 60 * 1000L
+        private const val HOUR_MS = 60 * 60 * 1000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,11 +78,9 @@ class MainActivity : AppCompatActivity() {
         batteryLevelText   = findViewById(R.id.batteryLevelText)
         statusText         = findViewById(R.id.statusText)
         dndStatusText      = findViewById(R.id.dndStatusText)
-        puzzleEquationText = findViewById(R.id.puzzleEquationText)
-        puzzleAnswerInput  = findViewById(R.id.puzzleAnswerInput)
-        puzzleErrorText    = findViewById(R.id.puzzleErrorText)
-        disableAlertsBtn   = findViewById(R.id.disableAlertsBtn)
-        puzzleSection      = findViewById(R.id.puzzleSection)
+        pause1hBtn         = findViewById(R.id.pause1hBtn)
+        pause2hBtn         = findViewById(R.id.pause2hBtn)
+        pauseSection       = findViewById(R.id.pauseSection)
         resumeSection      = findViewById(R.id.resumeSection)
         resumeAlertsBtn    = findViewById(R.id.resumeAlertsBtn)
         resumeTimeText     = findViewById(R.id.resumeTimeText)
@@ -112,55 +99,19 @@ class MainActivity : AppCompatActivity() {
 
         setupThresholdEditor()
         setupDeepSleepEditor()
-        generatePuzzle()
 
-        disableAlertsBtn.setOnClickListener { v ->
-            val input = puzzleAnswerInput.text.toString().trim()
-            if (input.isEmpty()) {
-                puzzleErrorText.text = getString(R.string.error_please_enter)
-                puzzleErrorText.visibility = View.VISIBLE
-                return@setOnClickListener
-            }
-
-            val userAnswer = input.toDoubleOrNull() ?: run {
-                puzzleErrorText.text = getString(R.string.error_invalid_number)
-                puzzleErrorText.visibility = View.VISIBLE
-                return@setOnClickListener
-            }
-
-            val expected1dp = floor(puzzleAnswer * 10) / 10.0
-            val user1dp     = floor(userAnswer * 10) / 10.0
-
-            if (abs(user1dp - expected1dp) < 0.001) {
-                puzzleErrorText.visibility = View.GONE
-                hideKeyboard(v)
-                
-                val resumeAt = System.currentTimeMillis() + AUTO_RESUME_DELAY_MS
-                prefs.edit {
-                    putBoolean(KEY_ENABLED, false)
-                        .putLong(KEY_RESUME_AT, resumeAt)
-                }
-                
-                scheduleAutoResume(resumeAt)
-                stopBatteryService()
-                updatePuzzleUI(false)
-            } else {
-                puzzleErrorText.text = getString(R.string.error_incorrect)
-                puzzleErrorText.visibility = View.VISIBLE
-                puzzleAnswerInput.selectAll()
-            }
-        }
+        pause1hBtn.setOnClickListener { pauseAlerts(1 * HOUR_MS) }
+        pause2hBtn.setOnClickListener { pauseAlerts(2 * HOUR_MS) }
 
         resumeAlertsBtn.setOnClickListener {
             prefs.edit {
                 putBoolean(KEY_ENABLED, true)
                     .remove(KEY_RESUME_AT)
             }
-            
+
             cancelAutoResume()
             startBatteryService()
-            generatePuzzle()
-            updatePuzzleUI(true)
+            updateAlertsUI(true)
         }
 
         findViewById<View>(R.id.dndPermissionBtn).setOnClickListener { requestDndPermission() }
@@ -304,28 +255,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun generatePuzzle() {
-        puzzleX = 1000 + Random.nextInt(9000)
-        puzzleY = 1000 + Random.nextInt(9000)
-        puzzleZ = 1000 + Random.nextInt(9000)
-        puzzleAnswer = sqrt((puzzleX.toLong() * puzzleY + puzzleZ).toDouble())
-        puzzleEquationText.text = getString(R.string.puzzle_equation_format, puzzleX, puzzleY, puzzleZ)
+    private fun pauseAlerts(durationMs: Long) {
+        val resumeAt = System.currentTimeMillis() + durationMs
+        prefs.edit {
+            putBoolean(KEY_ENABLED, false)
+                .putLong(KEY_RESUME_AT, resumeAt)
+        }
+        scheduleAutoResume(resumeAt)
+        stopBatteryService()
+        updateAlertsUI(false)
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updatePuzzleUI(alertsEnabled: Boolean) {
+    private fun updateAlertsUI(alertsEnabled: Boolean) {
         if (alertsEnabled) {
             statusText.text = getString(R.string.status_active)
             statusText.setTextColor(getColor(R.color.green))
-            puzzleSection.visibility = View.VISIBLE
+            pauseSection.visibility = View.VISIBLE
             resumeSection.visibility = View.GONE
-            puzzleAnswerInput.setText("")
-            puzzleErrorText.visibility = View.GONE
-            puzzleEquationText.text = getString(R.string.puzzle_equation_format, puzzleX, puzzleY, puzzleZ)
         } else {
             statusText.text = getString(R.string.status_disabled)
             statusText.setTextColor(getColor(R.color.red))
-            puzzleSection.visibility = View.GONE
+            pauseSection.visibility = View.GONE
             resumeSection.visibility = View.VISIBLE
             
             val resumeAt = prefs.getLong(KEY_RESUME_AT, 0L)
@@ -356,7 +307,7 @@ class MainActivity : AppCompatActivity() {
             dndStatusText.setTextColor(getColor(R.color.red))
         }
 
-        updatePuzzleUI(prefs.getBoolean(KEY_ENABLED, true))
+        updateAlertsUI(prefs.getBoolean(KEY_ENABLED, true))
     }
 
     private fun startBatteryService() {
