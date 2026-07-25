@@ -24,7 +24,7 @@ above the first threshold + 2% (22% with defaults). Saving new thresholds re-arm
 - **Vibration** with an intense siren-like pattern
 - **Full-screen alert** appears even on the lock screen
 - **Pause alerts** — one tap pauses alerts for 30 minutes, 1 hour, or 2 hours; they resume automatically
-- **Deep sleep window** — mute alarms during scheduled hours (e.g. 22:00–07:00, midnight-crossing supported); a threshold crossed while asleep fires on the first check after the window ends
+- **Deep sleep window** — mute alarms during scheduled hours (on by default, 23:00–07:00; midnight-crossing supported); a threshold crossed while asleep fires on the first check after the window ends
 - **Boot persistence** — service restarts automatically after device reboot
 
 ---
