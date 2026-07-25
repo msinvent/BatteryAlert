@@ -442,6 +442,93 @@
 
         </LinearLayout>
 
+        <!-- Deep Sleep Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="2dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/deep_sleep_label"
+                    android:textSize="11sp"
+                    android:textColor="@color/white"
+                    android:letterSpacing="0.15" />
+
+                <Switch
+                    android:id="@+id/deepSleepSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/deep_sleep_hint"
+                android:textSize="10sp"
+                android:textColor="@color/subtitle"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deep_sleep_from"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/deepSleepStartBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/divider"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deep_sleep_to"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/deepSleepEndBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/divider"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
         <!-- Note -->
         <TextView
             android:id="@+id/infoNoteText"

@@ -2,6 +2,7 @@ package com.batteryalert.app
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
+import android.app.TimePickerDialog
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -19,6 +20,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +59,11 @@ class MainActivity : AppCompatActivity() {
     private var sirenHighSec = 0
     private var sirenMidSec = 0
     private var sirenLowSec = 0
+
+    private lateinit var deepSleepSwitch: Switch
+    private lateinit var deepSleepStartBtn: Button
+    private lateinit var deepSleepEndBtn: Button
+    private var deepSleep = DeepSleepWindow.DEFAULT
 
     private var puzzleX = 0
     private var puzzleY = 0
@@ -99,7 +106,12 @@ class MainActivity : AppCompatActivity() {
         sirenLowBtn        = findViewById(R.id.sirenLowBtn)
         infoNoteText       = findViewById(R.id.infoNoteText)
 
+        deepSleepSwitch   = findViewById(R.id.deepSleepSwitch)
+        deepSleepStartBtn = findViewById(R.id.deepSleepStartBtn)
+        deepSleepEndBtn   = findViewById(R.id.deepSleepEndBtn)
+
         setupThresholdEditor()
+        setupDeepSleepEditor()
         generatePuzzle()
 
         disableAlertsBtn.setOnClickListener { v ->
@@ -187,7 +199,7 @@ class MainActivity : AppCompatActivity() {
         sirenMidSec = config.midSirenSec
         sirenLowSec = config.lowSirenSec
         refreshSirenButtons()
-        updateInfoNote(config)
+        updateInfoNote()
 
         sirenHighBtn.setOnClickListener {
             sirenHighSec = ThresholdConfig.nextSirenChoice(sirenHighSec)
@@ -217,9 +229,53 @@ class MainActivity : AppCompatActivity() {
             thresholdErrorText.visibility = View.GONE
             hideKeyboard(v)
             BatteryCheck.saveConfig(this, newConfig)
-            updateInfoNote(newConfig)
+            updateInfoNote()
             Toast.makeText(this, getString(R.string.toast_thresholds_saved), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun setupDeepSleepEditor() {
+        deepSleep = BatteryCheck.loadDeepSleep(this)
+        deepSleepSwitch.isChecked = deepSleep.enabled
+        refreshDeepSleepButtons()
+
+        deepSleepSwitch.setOnCheckedChangeListener { _, isChecked ->
+            deepSleep = deepSleep.copy(enabled = isChecked)
+            BatteryCheck.saveDeepSleep(this, deepSleep)
+            updateInfoNote()
+        }
+        deepSleepStartBtn.setOnClickListener {
+            pickTime(deepSleep.startMinutes) { minutes ->
+                deepSleep = deepSleep.copy(startMinutes = minutes)
+                BatteryCheck.saveDeepSleep(this, deepSleep)
+                refreshDeepSleepButtons()
+                updateInfoNote()
+            }
+        }
+        deepSleepEndBtn.setOnClickListener {
+            pickTime(deepSleep.endMinutes) { minutes ->
+                deepSleep = deepSleep.copy(endMinutes = minutes)
+                BatteryCheck.saveDeepSleep(this, deepSleep)
+                refreshDeepSleepButtons()
+                updateInfoNote()
+            }
+        }
+        updateInfoNote()
+    }
+
+    private fun pickTime(currentMinutes: Int, onPicked: (Int) -> Unit) {
+        TimePickerDialog(
+            this,
+            { _, hour, minute -> onPicked(hour * 60 + minute) },
+            currentMinutes / 60, currentMinutes % 60, true
+        ).show()
+    }
+
+    private fun refreshDeepSleepButtons() {
+        deepSleepStartBtn.text =
+            getString(R.string.time_format, deepSleep.startMinutes / 60, deepSleep.startMinutes % 60)
+        deepSleepEndBtn.text =
+            getString(R.string.time_format, deepSleep.endMinutes / 60, deepSleep.endMinutes % 60)
     }
 
     private fun refreshSirenButtons() {
@@ -228,9 +284,18 @@ class MainActivity : AppCompatActivity() {
         sirenLowBtn.text = getString(R.string.siren_length_format, sirenLowSec)
     }
 
-    private fun updateInfoNote(config: ThresholdConfig) {
-        infoNoteText.text =
-            getString(R.string.info_note_format, config.high + BatteryAlarmDecider.RESET_MARGIN)
+    private fun updateInfoNote() {
+        val config = BatteryCheck.loadConfig(this)
+        val base = getString(R.string.info_note_format, config.high + BatteryAlarmDecider.RESET_MARGIN)
+        infoNoteText.text = if (deepSleep.enabled) {
+            getString(
+                R.string.info_note_sleep_format, base,
+                deepSleep.startMinutes / 60, deepSleep.startMinutes % 60,
+                deepSleep.endMinutes / 60, deepSleep.endMinutes % 60
+            )
+        } else {
+            base
+        }
     }
 
     private fun generatePuzzle() {

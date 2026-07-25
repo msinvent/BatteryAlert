@@ -29,6 +29,16 @@ class ThresholdConfigTest {
     }
 
     @Test
+    fun `first alert must be strictly above second and second above third`() {
+        // Implied by the gap rule, pinned here as an explicit requirement.
+        assertTrue(ThresholdConfig(high = 30, mid = 25, low = 20).isValid())
+        assertFalse(ThresholdConfig(high = 25, mid = 25, low = 20).isValid()) // first == second
+        assertFalse(ThresholdConfig(high = 25, mid = 30, low = 20).isValid()) // second above first
+        assertFalse(ThresholdConfig(high = 30, mid = 20, low = 25).isValid()) // third above second
+        assertFalse(ThresholdConfig(high = 20, mid = 25, low = 30).isValid()) // fully ascending
+    }
+
+    @Test
     fun `bounds are enforced`() {
         assertFalse(ThresholdConfig(high = 96, mid = 50, low = 10).isValid())
         assertFalse(ThresholdConfig(high = 14, mid = 9, low = 4).isValid())

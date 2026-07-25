@@ -9,7 +9,8 @@
     <string name="puzzle_equation_format">sqrt(%1$d × %2$d + %3$d) = ?</string>
     <string name="status_active">● ACTIVE</string>
     <string name="status_disabled">● DISABLED</string>
-    <string name="info_note_format">ℹ️ Resets when you charge above %1$d%%. Alarm bypasses Do Not Disturb.</string>
+    <string name="info_note_format">ℹ️ Alerts re-arm when you charge above %1$d%%. Alarm bypasses Do Not Disturb.</string>
+    <string name="info_note_sleep_format">%1$s Deep sleep mutes alarms %2$02d:%3$02d–%4$02d:%5$02d.</string>
 
     <!-- Puzzle Section -->
     <string name="alerts_label">Alerts</string>
@@ -48,4 +49,11 @@
     <string name="error_thresholds">✗ Use 5–95%%, descending, at least 5%% apart</string>
     <string name="btn_save_thresholds">SAVE THRESHOLDS</string>
     <string name="toast_thresholds_saved">Thresholds updated — alerts re-armed</string>
+
+    <!-- Deep Sleep Section -->
+    <string name="deep_sleep_label">DEEP SLEEP</string>
+    <string name="deep_sleep_hint">No alarms during this window — a missed alert fires after it ends</string>
+    <string name="deep_sleep_from">From</string>
+    <string name="deep_sleep_to">To</string>
+    <string name="time_format">%1$02d:%2$02d</string>
 </resources>

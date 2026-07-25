@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.os.BatteryManager
 import android.util.Log
 import androidx.core.content.edit
+import java.util.Calendar
 
 /**
  * Replaces the old persistent monitoring service: each check reads the sticky
@@ -31,6 +32,10 @@ object BatteryCheck {
     private const val KEY_SIREN_HIGH_SEC = "siren_high_sec"
     private const val KEY_SIREN_MID_SEC = "siren_mid_sec"
     private const val KEY_SIREN_LOW_SEC = "siren_low_sec"
+
+    private const val KEY_SLEEP_ENABLED = "sleep_enabled"
+    private const val KEY_SLEEP_START_MIN = "sleep_start_min"
+    private const val KEY_SLEEP_END_MIN = "sleep_end_min"
 
     private const val INTERVAL_RELAXED_MS = 30 * 60 * 1000L
     private const val INTERVAL_WATCHFUL_MS = 15 * 60 * 1000L
@@ -71,6 +76,25 @@ object BatteryCheck {
         runNow(context)
     }
 
+    fun loadDeepSleep(context: Context): DeepSleepWindow {
+        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val default = DeepSleepWindow.DEFAULT
+        return DeepSleepWindow(
+            enabled = prefs.getBoolean(KEY_SLEEP_ENABLED, default.enabled),
+            startMinutes = prefs.getInt(KEY_SLEEP_START_MIN, default.startMinutes),
+            endMinutes = prefs.getInt(KEY_SLEEP_END_MIN, default.endMinutes)
+        )
+    }
+
+    fun saveDeepSleep(context: Context, window: DeepSleepWindow) {
+        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit {
+            putBoolean(KEY_SLEEP_ENABLED, window.enabled)
+                .putInt(KEY_SLEEP_START_MIN, window.startMinutes)
+                .putInt(KEY_SLEEP_END_MIN, window.endMinutes)
+        }
+    }
+
     fun runNow(context: Context) {
         val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return
         val level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
@@ -86,13 +110,20 @@ object BatteryCheck {
         val enabled = prefs.getBoolean(MainActivity.KEY_ENABLED, true)
         val config = loadConfig(context)
 
+        // During deep sleep the decider sees "disabled": no alarms, but flags
+        // stay unconsumed, so the deepest crossed threshold fires on the first
+        // check after the window ends.
+        val now = Calendar.getInstance()
+        val minutesOfDay = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+        val asleep = loadDeepSleep(context).contains(minutesOfDay)
+
         val decider = BatteryAlarmDecider(
             config = config,
             highFired = prefs.getBoolean(KEY_HIGH_FIRED, false),
             midFired = prefs.getBoolean(KEY_MID_FIRED, false),
             lowFired = prefs.getBoolean(KEY_LOW_FIRED, false)
         )
-        val decision = decider.onBatteryEvent(batteryPct, isCharging, enabled, isAlerting = false)
+        val decision = decider.onBatteryEvent(batteryPct, isCharging, enabled && !asleep, isAlerting = false)
         prefs.edit {
             putBoolean(KEY_HIGH_FIRED, decider.highFired)
                 .putBoolean(KEY_MID_FIRED, decider.midFired)

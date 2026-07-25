@@ -25,6 +25,7 @@ above the first threshold + 2% (22% with defaults). Saving new thresholds re-arm
 - **Full-screen alert** appears even on the lock screen
 - **Puzzle to disable** — solve a maths puzzle to turn alerts off (prevents accidental taps)
 - **Auto resume** — alerts automatically turn back on after 15 minutes if manually disabled
+- **Deep sleep window** — mute alarms during scheduled hours (e.g. 22:00–07:00, midnight-crossing supported); a threshold crossed while asleep fires on the first check after the window ends
 - **Boot persistence** — service restarts automatically after device reboot
 
 ---
@@ -54,6 +55,7 @@ BatteryAlert/
 │   │   ├── BatteryAlarmService.kt   — Short-lived siren FGS (shortService), DND bypass while ringing
 │   │   ├── BatteryAlarmDecider.kt   — Pure threshold state machine (no Android deps, unit-tested)
 │   │   ├── ThresholdConfig.kt       — User thresholds + siren lengths, validation (pure, unit-tested)
+│   │   ├── DeepSleepWindow.kt       — Daily mute window incl. midnight wrap (pure, unit-tested)
 │   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume after 15 min
 │   │   └── BootReceiver.kt          — Restarts service after reboot
 │   └── res/
