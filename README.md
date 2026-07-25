@@ -191,6 +191,14 @@ To prevent Android from killing the background service:
 
 ---
 
+## History Notes
+
+- **`96baae5` (2026-07-25)** — removed the maths-puzzle "solve to disable" gate, replaced by
+  the 1h/2h PAUSE buttons. If the puzzle friction is ever wanted back, recover it from this
+  commit's parent: `git show 96baae5^ -- app/src/main/java/com/batteryalert/app/MainActivity.kt`.
+
+---
+
 ## Credits
 
 Built with assistance from [Claude](https://claude.ai) and the **Android Studio AI Assistant**.
