@@ -138,15 +138,15 @@ class BatteryMonitorService : Service() {
         when {
             batteryPct <= THRESHOLD_10 && !alert10Fired -> {
                 alert10Fired = true; alert15Fired = true; alert20Fired = true
-                triggerAlert(batteryPct, DURATION_10, "CRITICAL: $batteryPct% Battery!")
+                triggerAlert(batteryPct, DURATION_10, "Battery below $THRESHOLD_10% (now $batteryPct%)")
             }
             batteryPct <= THRESHOLD_15 && !alert15Fired -> {
                 alert15Fired = true; alert20Fired = true
-                triggerAlert(batteryPct, DURATION_15, "WARNING: $batteryPct% Battery!")
+                triggerAlert(batteryPct, DURATION_15, "Battery below $THRESHOLD_15% (now $batteryPct%)")
             }
             batteryPct <= THRESHOLD_20 && !alert20Fired -> {
                 alert20Fired = true
-                triggerAlert(batteryPct, DURATION_20, "ALERT: $batteryPct% Battery!")
+                triggerAlert(batteryPct, DURATION_20, "Battery below $THRESHOLD_20% (now $batteryPct%)")
             }
         }
     }
