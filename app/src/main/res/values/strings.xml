@@ -12,16 +12,11 @@
     <string name="info_note_sleep_format">%1$s Deep sleep mutes alarms %2$02d:%3$02d–%4$02d:%5$02d.</string>
 
     <!-- Pause Section -->
-    <string name="alerts_label">Alerts</string>
-    <string name="pause_label">PAUSE ALERTS</string>
+    <string name="alerts_label">Pause Alerts</string>
     <string name="btn_pause_30m">30 MIN</string>
     <string name="btn_pause_1h">1 HR</string>
     <string name="btn_pause_2h">2 HR</string>
-
-    <!-- Re-enable Section -->
-    <string name="alerts_off_message">Alerts are currently off.</string>
-    <string name="resume_time_format">Monitoring will automatically resume at %1$s</string>
-    <string name="btn_resume_alerts">RESUME MONITORING</string>
+    <string name="btn_enable_alerts">ENABLE</string>
 
     <!-- Permissions Section -->
     <string name="permissions_label">Permissions</string>

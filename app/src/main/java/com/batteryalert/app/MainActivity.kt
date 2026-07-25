@@ -1,6 +1,5 @@
 package com.batteryalert.app
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.TimePickerDialog
 import android.app.NotificationManager
@@ -14,21 +13,16 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.graphics.drawable.ColorDrawable
 import android.provider.Settings
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.net.toUri
 
@@ -38,10 +32,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pause30mBtn: Button
     private lateinit var pause1hBtn: Button
     private lateinit var pause2hBtn: Button
-    private lateinit var pauseSection: LinearLayout
-    private lateinit var resumeSection: LinearLayout
-    private lateinit var resumeAlertsBtn: Button
-    private lateinit var resumeTimeText: TextView
+    private lateinit var rootScroll: View
+    private lateinit var disabledOverlay: View
     private lateinit var batteryLevelText: TextView
     private lateinit var dndStatusText: TextView
     private lateinit var fsiStatusText: TextView
@@ -87,10 +79,8 @@ class MainActivity : AppCompatActivity() {
         pause30mBtn        = findViewById(R.id.pause30mBtn)
         pause1hBtn         = findViewById(R.id.pause1hBtn)
         pause2hBtn         = findViewById(R.id.pause2hBtn)
-        pauseSection       = findViewById(R.id.pauseSection)
-        resumeSection      = findViewById(R.id.resumeSection)
-        resumeAlertsBtn    = findViewById(R.id.resumeAlertsBtn)
-        resumeTimeText     = findViewById(R.id.resumeTimeText)
+        rootScroll         = findViewById(R.id.rootScroll)
+        disabledOverlay    = findViewById(R.id.disabledOverlay)
         thresholdHighInput = findViewById(R.id.thresholdHighInput)
         thresholdMidInput  = findViewById(R.id.thresholdMidInput)
         thresholdLowInput  = findViewById(R.id.thresholdLowInput)
@@ -111,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         pause1hBtn.setOnClickListener { pauseAlerts(1 * HOUR_MS) }
         pause2hBtn.setOnClickListener { pauseAlerts(2 * HOUR_MS) }
 
-        resumeAlertsBtn.setOnClickListener {
+        findViewById<Button>(R.id.enableAlertsBtn).setOnClickListener {
             prefs.edit {
                 putBoolean(KEY_ENABLED, true)
                     .remove(KEY_RESUME_AT)
@@ -292,33 +282,18 @@ class MainActivity : AppCompatActivity() {
         updateAlertsUI(false)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun updateAlertsUI(alertsEnabled: Boolean) {
-        // Whole-screen red wash while alerts are paused — an at-a-glance
-        // "you are not protected" signal. Foreground draws over children
-        // (cards included) without touching any individual view's colors.
-        findViewById<View>(R.id.rootScroll).foreground =
-            if (alertsEnabled) null else ColorDrawable(getColor(R.color.disabled_overlay))
+        // Paused state replaces the whole UI: red-washed backdrop with one
+        // big circular ENABLE button (disabledOverlay in the layout).
+        rootScroll.visibility = if (alertsEnabled) View.VISIBLE else View.GONE
+        disabledOverlay.visibility = if (alertsEnabled) View.GONE else View.VISIBLE
 
         if (alertsEnabled) {
             statusText.text = getString(R.string.status_active)
             statusText.setTextColor(getColor(R.color.green))
-            pauseSection.visibility = View.VISIBLE
-            resumeSection.visibility = View.GONE
         } else {
             statusText.text = getString(R.string.status_disabled)
             statusText.setTextColor(getColor(R.color.red))
-            pauseSection.visibility = View.GONE
-            resumeSection.visibility = View.VISIBLE
-            
-            val resumeAt = prefs.getLong(KEY_RESUME_AT, 0L)
-            if (resumeAt != 0L) {
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(resumeAt))
-                resumeTimeText.text = getString(R.string.resume_time_format, timeStr)
-                resumeTimeText.visibility = View.VISIBLE
-            } else {
-                resumeTimeText.visibility = View.GONE
-            }
         }
     }
 

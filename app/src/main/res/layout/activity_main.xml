@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rootScroll"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:fillViewport="true"
     android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp"
         android:gravity="center_horizontal">
 
-        <!-- Header -->
+        <!-- Header (always visible, even while paused) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +23,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="16dp" />
 
-        <!-- Battery Level Card -->
+        <!-- Battery Level Card (always visible, even while paused) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -54,60 +52,402 @@
 
         </LinearLayout>
 
-        <!-- Pause / Resume Card -->
-        <LinearLayout
-            android:id="@+id/pauseCard"
+        <!-- Lower pane: settings cards, or the paused takeover -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/card_background"
-            android:padding="10dp"
-            android:layout_marginBottom="6dp">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            <!-- Status row -->
-            <LinearLayout
+            <ScrollView
+                android:id="@+id/rootScroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
+                android:layout_height="match_parent"
+                android:fillViewport="true">
 
-                <TextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/alerts_label"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white" />
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
 
-                <TextView
-                    android:id="@+id/statusText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/status_active"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/green" />
-
-            </LinearLayout>
-
-            <!-- ── PAUSE SECTION (shown when alerts are enabled) ── -->
+                    <!-- Permissions Card -->
             <LinearLayout
-                android:id="@+id/pauseSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="visible">
+                android:background="@drawable/card_background"
+                android:padding="10dp"
+                android:layout_marginBottom="6dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/pause_label"
+                    android:text="@string/permissions_label"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/dndStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Checking..."
+                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/fsiStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Checking..."
+                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="6dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/dndPermissionBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:text="@string/btn_dnd"
+                        android:backgroundTint="@color/accent"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="4dp" />
+
+                    <Button
+                        android:id="@+id/alarmPermissionBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:text="@string/btn_alarm"
+                        android:backgroundTint="@color/accent"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="4dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Alert Schedule Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_background"
+                android:padding="16dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/schedule_label"
                     android:textSize="11sp"
                     android:textColor="@color/white"
-                    android:letterSpacing="0.12"
-                    android:layout_marginBottom="6dp" />
+                    android:letterSpacing="0.15"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/schedule_hint"
+                    android:textSize="10sp"
+                    android:textColor="@color/subtitle"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- First alert row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/threshold_first_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/white" />
+                    <EditText
+                        android:id="@+id/thresholdHighInput"
+                        android:layout_width="44dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:gravity="center"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:background="@null"
+                        android:importantForAutofill="no" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/percent_suffix"
+                        android:textSize="14sp"
+                        android:textColor="@color/white"
+                        android:layout_marginEnd="12dp" />
+                    <Button
+                        android:id="@+id/sirenHighBtn"
+                        android:layout_width="88dp"
+                        android:layout_height="36dp"
+                        android:backgroundTint="@color/divider"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/divider" android:layout_marginBottom="8dp"/>
+
+                <!-- Second alert row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/threshold_second_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/white" />
+                    <EditText
+                        android:id="@+id/thresholdMidInput"
+                        android:layout_width="44dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:gravity="center"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:background="@null"
+                        android:importantForAutofill="no" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/percent_suffix"
+                        android:textSize="14sp"
+                        android:textColor="@color/white"
+                        android:layout_marginEnd="12dp" />
+                    <Button
+                        android:id="@+id/sirenMidBtn"
+                        android:layout_width="88dp"
+                        android:layout_height="36dp"
+                        android:backgroundTint="@color/divider"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/divider" android:layout_marginBottom="8dp"/>
+
+                <!-- Final alert row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/threshold_third_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/white" />
+                    <EditText
+                        android:id="@+id/thresholdLowInput"
+                        android:layout_width="44dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:gravity="center"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:background="@null"
+                        android:importantForAutofill="no" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/percent_suffix"
+                        android:textSize="14sp"
+                        android:textColor="@color/white"
+                        android:layout_marginEnd="12dp" />
+                    <Button
+                        android:id="@+id/sirenLowBtn"
+                        android:layout_width="88dp"
+                        android:layout_height="36dp"
+                        android:backgroundTint="@color/divider"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/thresholdErrorText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/error_thresholds"
+                    android:textSize="12sp"
+                    android:textColor="@color/red"
+                    android:visibility="gone"
+                    android:layout_marginBottom="8dp" />
+
+                <Button
+                    android:id="@+id/saveThresholdsBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:text="@string/btn_save_thresholds"
+                    android:backgroundTint="@color/accent"
+                    android:textColor="@color/black"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Deep Sleep Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_background"
+                android:padding="16dp"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="2dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/deep_sleep_label"
+                        android:textSize="11sp"
+                        android:textColor="@color/white"
+                        android:letterSpacing="0.15" />
+
+                    <Switch
+                        android:id="@+id/deepSleepSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deep_sleep_hint"
+                    android:textSize="10sp"
+                    android:textColor="@color/subtitle"
+                    android:layout_marginBottom="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/deep_sleep_from"
+                        android:textSize="13sp"
+                        android:textColor="@color/white"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/deepSleepStartBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/divider"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/deep_sleep_to"
+                        android:textSize="13sp"
+                        android:textColor="@color/white"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/deepSleepEndBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/divider"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Pause Alerts Card (grey, bottom) -->
+            <LinearLayout
+                android:id="@+id/pauseCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_background"
+                android:backgroundTint="@color/divider"
+                android:padding="10dp"
+                android:layout_marginBottom="6dp">
+
+                <!-- Status row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/alerts_label"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white" />
+
+                    <TextView
+                        android:id="@+id/statusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/status_active"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/green" />
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -120,8 +460,8 @@
                         android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="@string/btn_pause_30m"
-                        android:backgroundTint="@color/green"
-                        android:textColor="@color/black"
+                        android:backgroundTint="@color/card_bg"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:layout_marginEnd="4dp" />
@@ -132,8 +472,8 @@
                         android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="@string/btn_pause_1h"
-                        android:backgroundTint="@color/green"
-                        android:textColor="@color/black"
+                        android:backgroundTint="@color/card_bg"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:layout_marginStart="4dp"
@@ -145,8 +485,8 @@
                         android:layout_height="38dp"
                         android:layout_weight="1"
                         android:text="@string/btn_pause_2h"
-                        android:backgroundTint="@color/green"
-                        android:textColor="@color/black"
+                        android:backgroundTint="@color/card_bg"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:layout_marginStart="4dp" />
@@ -155,393 +495,47 @@
 
             </LinearLayout>
 
-            <!-- ── RESUME SECTION (shown when alerts are disabled) ── -->
-            <LinearLayout
-                android:id="@+id/resumeSection"
+            <!-- Note -->
+            <TextView
+                android:id="@+id/infoNoteText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/alerts_off_message"
-                    android:textSize="12sp"
-                    android:textColor="@color/white"
-                    android:layout_marginBottom="4dp" />
-
-                <TextView
-                    android:id="@+id/resumeTimeText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="11sp"
-                    android:textStyle="italic"
-                    android:textColor="@color/white"
-                    android:layout_marginBottom="12dp" />
-
-                <Button
-                    android:id="@+id/resumeAlertsBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:text="@string/btn_resume_alerts"
-                    android:backgroundTint="@color/green"
-                    android:textColor="@color/black"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Permissions Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/card_background"
-            android:padding="10dp"
-            android:layout_marginBottom="6dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/permissions_label"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:layout_marginBottom="2dp" />
-
-            <TextView
-                android:id="@+id/dndStatusText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Checking..."
-                android:textSize="12sp"
-                android:textColor="@color/white"
-                android:layout_marginBottom="2dp" />
-
-            <TextView
-                android:id="@+id/fsiStatusText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Checking..."
-                android:textSize="12sp"
-                android:textColor="@color/white"
-                android:layout_marginBottom="6dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/dndPermissionBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:text="@string/btn_dnd"
-                    android:backgroundTint="@color/accent"
-                    android:textColor="@color/black"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="4dp" />
-
-                <Button
-                    android:id="@+id/alarmPermissionBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:text="@string/btn_alarm"
-                    android:backgroundTint="@color/accent"
-                    android:textColor="@color/black"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="4dp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Alert Schedule Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/schedule_label"
-                android:textSize="11sp"
-                android:textColor="@color/white"
-                android:letterSpacing="0.15"
-                android:layout_marginBottom="2dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/schedule_hint"
                 android:textSize="10sp"
-                android:textColor="@color/subtitle"
-                android:layout_marginBottom="8dp" />
+                android:textColor="@color/white"
+                android:layout_marginBottom="16dp" />
 
-            <!-- First alert row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/threshold_first_label"
-                    android:textSize="14sp"
-                    android:textColor="@color/white" />
-                <EditText
-                    android:id="@+id/thresholdHighInput"
-                    android:layout_width="44dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:maxLength="2"
-                    android:gravity="center"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:background="@null"
-                    android:importantForAutofill="no" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/percent_suffix"
-                    android:textSize="14sp"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="12dp" />
-                <Button
-                    android:id="@+id/sirenHighBtn"
-                    android:layout_width="88dp"
-                    android:layout_height="36dp"
-                    android:backgroundTint="@color/divider"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
 
-            <!-- Divider -->
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/divider" android:layout_marginBottom="8dp"/>
-
-            <!-- Second alert row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/threshold_second_label"
-                    android:textSize="14sp"
-                    android:textColor="@color/white" />
-                <EditText
-                    android:id="@+id/thresholdMidInput"
-                    android:layout_width="44dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:maxLength="2"
-                    android:gravity="center"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:background="@null"
-                    android:importantForAutofill="no" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/percent_suffix"
-                    android:textSize="14sp"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="12dp" />
-                <Button
-                    android:id="@+id/sirenMidBtn"
-                    android:layout_width="88dp"
-                    android:layout_height="36dp"
-                    android:backgroundTint="@color/divider"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Divider -->
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/divider" android:layout_marginBottom="8dp"/>
-
-            <!-- Final alert row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/threshold_third_label"
-                    android:textSize="14sp"
-                    android:textColor="@color/white" />
-                <EditText
-                    android:id="@+id/thresholdLowInput"
-                    android:layout_width="44dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:maxLength="2"
-                    android:gravity="center"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:background="@null"
-                    android:importantForAutofill="no" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/percent_suffix"
-                    android:textSize="14sp"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="12dp" />
-                <Button
-                    android:id="@+id/sirenLowBtn"
-                    android:layout_width="88dp"
-                    android:layout_height="36dp"
-                    android:backgroundTint="@color/divider"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/thresholdErrorText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/error_thresholds"
-                android:textSize="12sp"
-                android:textColor="@color/red"
-                android:visibility="gone"
-                android:layout_marginBottom="8dp" />
-
-            <Button
-                android:id="@+id/saveThresholdsBtn"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:text="@string/btn_save_thresholds"
-                android:backgroundTint="@color/accent"
-                android:textColor="@color/black"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Deep Sleep Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="8dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="2dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/deep_sleep_label"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    android:letterSpacing="0.15" />
-
-                <Switch
-                    android:id="@+id/deepSleepSwitch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/deep_sleep_hint"
-                android:textSize="10sp"
-                android:textColor="@color/subtitle"
-                android:layout_marginBottom="10dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/deep_sleep_from"
-                    android:textSize="13sp"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="8dp" />
-
-                <Button
-                    android:id="@+id/deepSleepStartBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/divider"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="12dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/deep_sleep_to"
-                    android:textSize="13sp"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="8dp" />
-
-                <Button
-                    android:id="@+id/deepSleepEndBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/divider"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Note -->
-        <TextView
-            android:id="@+id/infoNoteText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="10sp"
-            android:textColor="@color/white"
-            android:layout_marginBottom="16dp" />
+        </FrameLayout>
 
     </LinearLayout>
-</ScrollView>
+
+    <!-- Paused takeover: red wash over the ENTIRE app (header and battery
+         card show through it); the enable button draws above the wash so
+         it stays clean green. -->
+    <FrameLayout
+        android:id="@+id/disabledOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/disabled_overlay" />
+
+        <Button
+            android:id="@+id/enableAlertsBtn"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_green"
+            android:text="@string/btn_enable_alerts"
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+    </FrameLayout>
+
+</FrameLayout>
