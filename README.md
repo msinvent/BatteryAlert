@@ -51,15 +51,18 @@ BatteryAlert/
 ├── app/src/main/
 │   ├── AndroidManifest.xml
 │   ├── java/com/batteryalert/app/
-│   │   ├── MainActivity.kt          — UI: pause/resume, threshold + deep sleep editors
-│   │   ├── BatteryCheck.kt          — Scheduled battery checks (exact alarms, adaptive interval)
+│   │   ├── MainActivity.kt          — UI only: renders state, delegates transitions to BatteryCheck
+│   │   ├── BatteryCheck.kt          — Domain façade: check loop, pause/resume + auto-resume alarm, config persistence
 │   │   ├── BatteryCheckReceiver.kt  — Alarm receiver that runs each check
 │   │   ├── BatteryAlarmService.kt   — Short-lived siren FGS (shortService), DND bypass while ringing
 │   │   ├── BatteryAlarmDecider.kt   — Pure threshold state machine (no Android deps, unit-tested)
 │   │   ├── ThresholdConfig.kt       — User thresholds + siren lengths, validation (pure, unit-tested)
 │   │   ├── DeepSleepWindow.kt       — Daily mute window incl. midnight wrap (pure, unit-tested)
-│   │   ├── AutoResumeReceiver.kt    — AlarmManager receiver for auto resume when a pause ends
-│   │   └── BootReceiver.kt          — Restarts service after reboot
+│   │   ├── Prefs.kt                 — Single SharedPreferences access point + shared keys
+│   │   ├── AppThemes.kt             — Four selectable themes, applied live via view tags
+│   │   ├── AutoResumeReceiver.kt    — Fires BatteryCheck.resume() when a pause ends
+│   │   ├── ExactAlarmPermissionReceiver.kt — Re-bootstraps checks when exact-alarm is granted back
+│   │   └── BootReceiver.kt          — Re-bootstraps checks after reboot
 │   └── res/
 │       ├── layout/activity_main.xml
 │       ├── values/colors.xml

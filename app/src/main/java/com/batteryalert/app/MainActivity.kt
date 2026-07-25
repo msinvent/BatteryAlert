@@ -3,16 +3,10 @@ package com.batteryalert.app
 import android.app.AlarmManager
 import android.app.TimePickerDialog
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
-import android.os.BatteryManager
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -25,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,12 +53,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
 
     companion object {
-        const val PREFS_NAME = "BatteryAlertPrefs"
-        const val KEY_ENABLED = "alerts_enabled"
-        const val KEY_RESUME_AT = "resume_at"
-        const val ACTION_AUTO_RESUME = "com.batteryalert.app.AUTO_RESUME"
-        private const val KEY_ALARM_PROMPTED = "exact_alarm_prompted"
-        private const val KEY_THEME = "app_theme"
         private const val HOUR_MS = 60 * 60 * 1000L
     }
 
@@ -71,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs = Prefs.get(this)
 
         batteryLevelText   = findViewById(R.id.batteryLevelText)
         statusText         = findViewById(R.id.statusText)
@@ -103,13 +92,7 @@ class MainActivity : AppCompatActivity() {
         pause2hBtn.setOnClickListener { pauseAlerts(2 * HOUR_MS) }
 
         findViewById<Button>(R.id.enableAlertsBtn).setOnClickListener {
-            prefs.edit {
-                putBoolean(KEY_ENABLED, true)
-                    .remove(KEY_RESUME_AT)
-            }
-
-            cancelAutoResume()
-            startBatteryService()
+            BatteryCheck.resume(this)
             updateAlertsUI(true)
         }
 
@@ -117,15 +100,13 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.alarmPermissionBtn).setOnClickListener { requestAlarmPermission() }
         fsiStatusText.setOnClickListener { requestFullScreenIntentPermission() }
         findViewById<Button>(R.id.themeBtn).setOnClickListener { showThemePicker() }
-        applyTheme(prefs.getInt(KEY_THEME, AppThemes.DEFAULT_INDEX))
+        applyTheme(prefs.getInt(Prefs.KEY_THEME, AppThemes.DEFAULT_INDEX))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
-        }
+        requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
         maybePromptExactAlarm()
 
-        if (prefs.getBoolean(KEY_ENABLED, true)) {
-            startBatteryService()
+        if (prefs.getBoolean(Prefs.KEY_ENABLED, true)) {
+            BatteryCheck.runNow(this)
         }
     }
 
@@ -134,8 +115,8 @@ class MainActivity : AppCompatActivity() {
     private fun maybePromptExactAlarm() {
         val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (am.canScheduleExactAlarms()) return
-        if (prefs.getBoolean(KEY_ALARM_PROMPTED, false)) return
-        prefs.edit { putBoolean(KEY_ALARM_PROMPTED, true) }
+        if (prefs.getBoolean(Prefs.KEY_ALARM_PROMPTED, false)) return
+        prefs.edit { putBoolean(Prefs.KEY_ALARM_PROMPTED, true) }
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.exact_alarm_prompt_title))
@@ -151,18 +132,12 @@ class MainActivity : AppCompatActivity() {
 
         // Self-heal the check chain: a force-stop or exact-alarm revocation
         // cancels the scheduled check, so every app open re-bootstraps it.
-        if (prefs.getBoolean(KEY_ENABLED, true)) {
+        if (prefs.getBoolean(Prefs.KEY_ENABLED, true)) {
             BatteryCheck.runNow(this)
-        }
-
-        // If alerts are disabled, check if they should have been resumed already
-        if (!prefs.getBoolean(KEY_ENABLED, true)) {
-            val resumeAt = prefs.getLong(KEY_RESUME_AT, 0L)
-            if (resumeAt != 0L && System.currentTimeMillis() >= resumeAt) {
-                prefs.edit { putBoolean(KEY_ENABLED, true).remove(KEY_RESUME_AT) }
-                startBatteryService()
-                updateUI()
-            }
+        } else if (BatteryCheck.resumeOverdue(this)) {
+            // The pause expired but the auto-resume alarm never fired.
+            BatteryCheck.resume(this)
+            updateUI()
         }
     }
 
@@ -275,13 +250,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun pauseAlerts(durationMs: Long) {
-        val resumeAt = System.currentTimeMillis() + durationMs
-        prefs.edit {
-            putBoolean(KEY_ENABLED, false)
-                .putLong(KEY_RESUME_AT, resumeAt)
-        }
-        scheduleAutoResume(resumeAt)
-        stopBatteryService()
+        BatteryCheck.pause(this, durationMs)
         updateAlertsUI(false)
     }
 
@@ -301,11 +270,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        val batteryStatus = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        batteryStatus?.let {
-            val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-            val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-            batteryLevelText.text = getString(R.string.battery_level_format, (level / scale.toFloat() * 100).toInt())
+        BatteryCheck.readBattery(this)?.let {
+            batteryLevelText.text = getString(R.string.battery_level_format, it.percent)
         }
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
@@ -335,17 +301,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.permissionsCard).visibility =
             if (dndOk && fsiOk && alarmOk) View.GONE else View.VISIBLE
 
-        updateAlertsUI(prefs.getBoolean(KEY_ENABLED, true))
-    }
-
-    private fun startBatteryService() {
-        BatteryCheck.runNow(this)
-    }
-
-    private fun stopBatteryService() {
-        BatteryCheck.cancel(this)
-        // Also kill an actively ringing siren.
-        stopService(Intent(this, BatteryAlarmService::class.java))
+        updateAlertsUI(prefs.getBoolean(Prefs.KEY_ENABLED, true))
     }
 
     private fun requestDndPermission() {
@@ -359,19 +315,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            if (!am.canScheduleExactAlarms()) {
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                    data = "package:$packageName".toUri()
-                }
-                startActivity(intent)
-                Toast.makeText(this, getString(R.string.toast_alarm_access), Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, getString(R.string.toast_alarm_already_granted), Toast.LENGTH_SHORT).show()
+        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (!am.canScheduleExactAlarms()) {
+            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                data = "package:$packageName".toUri()
             }
+            startActivity(intent)
+            Toast.makeText(this, getString(R.string.toast_alarm_access), Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(this, getString(R.string.toast_alarm_not_required), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_alarm_already_granted), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -379,7 +331,7 @@ class MainActivity : AppCompatActivity() {
         val safe = index.coerceIn(0, AppThemes.ALL.size - 1)
         val theme = AppThemes.ALL[safe]
         AppThemes.apply(findViewById(R.id.rootFrame), theme)
-        val insets = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+        val insets = WindowCompat.getInsetsController(window, window.decorView)
         insets.isAppearanceLightStatusBars = theme.lightSystemBars
         insets.isAppearanceLightNavigationBars = theme.lightSystemBars
         updateUI() // reapply semantic status colours over the theme
@@ -387,11 +339,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun showThemePicker() {
         val names = AppThemes.ALL.map { it.name }.toTypedArray()
-        val current = prefs.getInt(KEY_THEME, AppThemes.DEFAULT_INDEX)
+        val current = prefs.getInt(Prefs.KEY_THEME, AppThemes.DEFAULT_INDEX)
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.theme_picker_title))
             .setSingleChoiceItems(names, current) { dialog, which ->
-                prefs.edit { putInt(KEY_THEME, which) }
+                prefs.edit { putInt(Prefs.KEY_THEME, which) }
                 applyTheme(which)
                 dialog.dismiss()
             }
@@ -409,39 +361,5 @@ class MainActivity : AppCompatActivity() {
     private fun hideKeyboard(view: View) {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
-    private fun scheduleAutoResume(timeMs: Long) {
-        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, AutoResumeReceiver::class.java).apply {
-            action = ACTION_AUTO_RESUME
-        }
-        val pi = PendingIntent.getBroadcast(
-            this, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (am.canScheduleExactAlarms()) {
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
-            } else {
-                // Fallback to non-exact if permission not granted
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
-            }
-        } else {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, pi)
-        }
-    }
-
-    private fun cancelAutoResume() {
-        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, AutoResumeReceiver::class.java).apply {
-            action = ACTION_AUTO_RESUME
-        }
-        val pi = PendingIntent.getBroadcast(
-            this, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        am.cancel(pi)
     }
 }

@@ -10,17 +10,23 @@ import android.util.Log
 import androidx.core.content.edit
 import java.util.Calendar
 
+data class BatteryReading(val percent: Int, val isCharging: Boolean)
+
 /**
- * Replaces the old persistent monitoring service: each check reads the sticky
- * battery intent, feeds the decider (state persisted in prefs), rings
- * BatteryAlarmService when a threshold trips, and schedules the next check
- * with a battery-adaptive delay. No long-lived process, no specialUse FGS.
+ * The domain façade. Owns the whole alert lifecycle outside the siren itself:
+ * scheduled checks (exact alarms, adaptive interval), the pause/resume state
+ * transition and its auto-resume alarm, config + deep-sleep persistence, and
+ * the decider's fired-flag state across process death. No long-lived process,
+ * no specialUse FGS. UI and receivers call in; only BatteryAlarmService is
+ * launched out.
  */
 object BatteryCheck {
 
     private const val TAG = "BatteryAlertCheck"
     private const val REQUEST_CODE_CHECK = 1
+    private const val REQUEST_CODE_AUTO_RESUME = 2
     const val ACTION_BATTERY_CHECK = "com.batteryalert.app.BATTERY_CHECK"
+    const val ACTION_AUTO_RESUME = "com.batteryalert.app.AUTO_RESUME"
 
     private const val KEY_HIGH_FIRED = "alert_high_fired"
     private const val KEY_MID_FIRED = "alert_mid_fired"
@@ -44,8 +50,58 @@ object BatteryCheck {
     private const val MARGIN_RELAXED = 30
     private const val MARGIN_WATCHFUL = 10
 
+    // ── Battery ──
+
+    fun readBattery(context: Context): BatteryReading? {
+        val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return null
+        val level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+        if (level < 0 || scale <= 0) return null
+        val status = battery.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        return BatteryReading(
+            percent = (level / scale.toFloat() * 100).toInt(),
+            isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
+                    || status == BatteryManager.BATTERY_STATUS_FULL
+        )
+    }
+
+    // ── Pause / resume (the only place this transition lives) ──
+
+    fun pause(context: Context, durationMs: Long) {
+        val resumeAt = System.currentTimeMillis() + durationMs
+        Prefs.get(context).edit {
+            putBoolean(Prefs.KEY_ENABLED, false)
+                .putLong(Prefs.KEY_RESUME_AT, resumeAt)
+        }
+        setAlarm(context, resumeAt, autoResumePendingIntent(context))
+        cancel(context)
+        // Also kill an actively ringing siren.
+        context.stopService(Intent(context, BatteryAlarmService::class.java))
+        Log.d(TAG, "Paused until $resumeAt")
+    }
+
+    fun resume(context: Context) {
+        Prefs.get(context).edit {
+            putBoolean(Prefs.KEY_ENABLED, true)
+                .remove(Prefs.KEY_RESUME_AT)
+        }
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        am.cancel(autoResumePendingIntent(context))
+        runNow(context)
+    }
+
+    /** True when a pause has expired but the auto-resume alarm never fired. */
+    fun resumeOverdue(context: Context): Boolean {
+        val prefs = Prefs.get(context)
+        if (prefs.getBoolean(Prefs.KEY_ENABLED, true)) return false
+        val resumeAt = prefs.getLong(Prefs.KEY_RESUME_AT, 0L)
+        return resumeAt != 0L && System.currentTimeMillis() >= resumeAt
+    }
+
+    // ── Config persistence ──
+
     fun loadConfig(context: Context): ThresholdConfig {
-        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = Prefs.get(context)
         val default = ThresholdConfig.DEFAULT
         val config = ThresholdConfig(
             high = prefs.getInt(KEY_THRESHOLD_HIGH, default.high),
@@ -61,8 +117,7 @@ object BatteryCheck {
     /** Persists a new config, re-arms all thresholds, and re-evaluates now. */
     fun saveConfig(context: Context, config: ThresholdConfig) {
         require(config.isValid()) { "invalid threshold config: $config" }
-        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit {
+        Prefs.get(context).edit {
             putInt(KEY_THRESHOLD_HIGH, config.high)
                 .putInt(KEY_THRESHOLD_MID, config.mid)
                 .putInt(KEY_THRESHOLD_LOW, config.low)
@@ -77,7 +132,7 @@ object BatteryCheck {
     }
 
     fun loadDeepSleep(context: Context): DeepSleepWindow {
-        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = Prefs.get(context)
         val default = DeepSleepWindow.DEFAULT
         val window = DeepSleepWindow(
             enabled = prefs.getBoolean(KEY_SLEEP_ENABLED, default.enabled),
@@ -88,27 +143,19 @@ object BatteryCheck {
     }
 
     fun saveDeepSleep(context: Context, window: DeepSleepWindow) {
-        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit {
+        Prefs.get(context).edit {
             putBoolean(KEY_SLEEP_ENABLED, window.enabled)
                 .putInt(KEY_SLEEP_START_MIN, window.startMinutes)
                 .putInt(KEY_SLEEP_END_MIN, window.endMinutes)
         }
     }
 
+    // ── The check loop ──
+
     fun runNow(context: Context) {
-        val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return
-        val level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-        val scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-        if (level < 0 || scale <= 0) return
-        val batteryPct = (level / scale.toFloat() * 100).toInt()
-
-        val status = battery.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
-                || status == BatteryManager.BATTERY_STATUS_FULL
-
-        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        val enabled = prefs.getBoolean(MainActivity.KEY_ENABLED, true)
+        val reading = readBattery(context) ?: return
+        val prefs = Prefs.get(context)
+        val enabled = prefs.getBoolean(Prefs.KEY_ENABLED, true)
         val config = loadConfig(context)
 
         // During deep sleep the decider sees "disabled": no alarms, but flags
@@ -124,28 +171,39 @@ object BatteryCheck {
             midFired = prefs.getBoolean(KEY_MID_FIRED, false),
             lowFired = prefs.getBoolean(KEY_LOW_FIRED, false)
         )
-        val decision = decider.onBatteryEvent(batteryPct, isCharging, enabled && !asleep, isAlerting = false)
+        val decision = decider.onBatteryEvent(
+            reading.percent, reading.isCharging, enabled && !asleep, isAlerting = false
+        )
         prefs.edit {
             putBoolean(KEY_HIGH_FIRED, decider.highFired)
                 .putBoolean(KEY_MID_FIRED, decider.midFired)
                 .putBoolean(KEY_LOW_FIRED, decider.lowFired)
         }
 
-        Log.d(TAG, "Check: $batteryPct% charging=$isCharging enabled=$enabled -> $decision")
+        Log.d(TAG, "Check: ${reading.percent}% charging=${reading.isCharging} enabled=$enabled -> $decision")
 
         if (decision is BatteryAlarmDecider.Decision.Trigger) {
             startAlarm(context, decision)
         }
 
         if (enabled) {
-            schedule(context, nextDelayMs(batteryPct, isCharging, config))
+            schedule(context, nextDelayMs(reading.percent, reading.isCharging, config))
         }
     }
 
     fun schedule(context: Context, delayMs: Long) {
+        setAlarm(context, System.currentTimeMillis() + delayMs, checkPendingIntent(context))
+    }
+
+    fun cancel(context: Context) {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val triggerAt = System.currentTimeMillis() + delayMs
-        val pi = checkPendingIntent(context)
+        am.cancel(checkPendingIntent(context))
+    }
+
+    // ── Internals ──
+
+    private fun setAlarm(context: Context, triggerAt: Long, pi: PendingIntent) {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         try {
             if (am.canScheduleExactAlarms()) {
                 am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
@@ -156,11 +214,6 @@ object BatteryCheck {
             // Exact-alarm permission revoked between the check and the call.
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi)
         }
-    }
-
-    fun cancel(context: Context) {
-        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        am.cancel(checkPendingIntent(context))
     }
 
     private fun startAlarm(context: Context, decision: BatteryAlarmDecider.Decision.Trigger) {
@@ -180,6 +233,13 @@ object BatteryCheck {
         PendingIntent.getBroadcast(
             context, REQUEST_CODE_CHECK,
             Intent(context, BatteryCheckReceiver::class.java).setAction(ACTION_BATTERY_CHECK),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+    private fun autoResumePendingIntent(context: Context): PendingIntent =
+        PendingIntent.getBroadcast(
+            context, REQUEST_CODE_AUTO_RESUME,
+            Intent(context, AutoResumeReceiver::class.java).setAction(ACTION_AUTO_RESUME),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
