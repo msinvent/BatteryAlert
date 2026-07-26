@@ -114,9 +114,16 @@ object BatteryCheck {
         return if (config.isValid()) config else default
     }
 
-    /** Persists a new config, re-arms all thresholds, and re-evaluates now. */
+    /**
+     * Persists a new config. Saving never rings: thresholds the battery is
+     * already at or below are seeded as fired, so each alert arms for the
+     * next downward crossing instead of re-ringing on every settings save.
+     */
     fun saveConfig(context: Context, config: ThresholdConfig) {
         require(config.isValid()) { "invalid threshold config: $config" }
+        val (highFired, midFired, lowFired) =
+            readBattery(context)?.let { config.firedFlagsAt(it.percent) }
+                ?: Triple(false, false, false)
         Prefs.get(context).edit {
             putInt(KEY_THRESHOLD_HIGH, config.high)
                 .putInt(KEY_THRESHOLD_MID, config.mid)
@@ -124,9 +131,9 @@ object BatteryCheck {
                 .putInt(KEY_SIREN_HIGH_SEC, config.highSirenSec)
                 .putInt(KEY_SIREN_MID_SEC, config.midSirenSec)
                 .putInt(KEY_SIREN_LOW_SEC, config.lowSirenSec)
-                .remove(KEY_HIGH_FIRED)
-                .remove(KEY_MID_FIRED)
-                .remove(KEY_LOW_FIRED)
+                .putBoolean(KEY_HIGH_FIRED, highFired)
+                .putBoolean(KEY_MID_FIRED, midFired)
+                .putBoolean(KEY_LOW_FIRED, lowFired)
         }
         runNow(context)
     }

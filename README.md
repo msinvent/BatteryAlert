@@ -16,7 +16,8 @@ Three thresholds, **configurable in the app** (defaults below). Each must sit at
 | Final  | 10%           | 1 minute      |
 
 Each alert fires **once per discharge cycle** and resets automatically when you charge
-above the first threshold + 2% (22% with defaults). Saving new thresholds re-arms all alerts.
+above the first threshold + 2% (22% with defaults). Saving thresholds never sounds the
+siren immediately — levels the battery is already below arm for the next crossing.
 
 ---
 

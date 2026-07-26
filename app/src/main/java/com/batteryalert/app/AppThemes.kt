@@ -32,7 +32,10 @@ object AppThemes {
         val onAccent: Int,
         val neutralBtn: Int,
         val onNeutral: Int,
-        val divider: Int
+        val divider: Int,
+        /** Translucent red laid over the whole app while paused — tuned per
+         *  theme so the enable screen still reads as that theme underneath. */
+        val pausedWash: Int
     )
 
     val ALL = listOf(
@@ -40,22 +43,26 @@ object AppThemes {
             0xFFF4FBF7.toInt(), 0xFFE5F3EB.toInt(), 0xFFD5EADF.toInt(),
             0xFF15352A.toInt(), 0xFF5E7D70.toInt(),
             0xFF0F9D58.toInt(), 0xFFFFFFFF.toInt(),
-            0xFFCBE2D6.toInt(), 0xFF15352A.toInt(), 0xFFD2E5DA.toInt()),
+            0xFFCBE2D6.toInt(), 0xFF15352A.toInt(), 0xFFD2E5DA.toInt(),
+            0x38E11D48),
         Theme("Cream Comfort", true,
             0xFFFFF8F0.toInt(), 0xFFF7EFE3.toInt(), 0xFFEFE3D0.toInt(),
             0xFF3D3327.toInt(), 0xFF8A7B68.toInt(),
             0xFFC2410C.toInt(), 0xFFFFFFFF.toInt(),
-            0xFFE4D8C4.toInt(), 0xFF3D3327.toInt(), 0xFFE0D4C0.toInt()),
+            0xFFE4D8C4.toInt(), 0xFF3D3327.toInt(), 0xFFE0D4C0.toInt(),
+            0x38DC2626),
         Theme("Deep Ocean", false,
             0xFF06222E.toInt(), 0xFF0E3442.toInt(), 0xFF174B5D.toInt(),
             0xFFE2F4F9.toInt(), 0xFF86AEBB.toInt(),
             0xFF4DD0E1.toInt(), 0xFF03242E.toInt(),
-            0xFF20586B.toInt(), 0xFFE2F4F9.toInt(), 0xFF154555.toInt()),
+            0xFF20586B.toInt(), 0xFFE2F4F9.toInt(), 0xFF154555.toInt(),
+            0x40F43F5E),
         Theme("Lavender", true,
             0xFFFAF8FF.toInt(), 0xFFF0EBFA.toInt(), 0xFFE4DCF4.toInt(),
             0xFF2C2540.toInt(), 0xFF6F6689.toInt(),
             0xFF7C4DFF.toInt(), 0xFFFFFFFF.toInt(),
-            0xFFDCD2EF.toInt(), 0xFF2C2540.toInt(), 0xFFE0D8F0.toInt())
+            0xFFDCD2EF.toInt(), 0xFF2C2540.toInt(), 0xFFE0D8F0.toInt(),
+            0x38E11D48)
     )
 
     fun apply(root: View, theme: Theme) {
@@ -76,6 +83,7 @@ object AppThemes {
                 (view as? Button)?.setTextColor(t.onNeutral)
             }
             "divider" -> view.setBackgroundColor(t.divider)
+            "pausedWash" -> view.setBackgroundColor(t.pausedWash)
             "textSecondary" -> (view as? TextView)?.setTextColor(t.textSecondary)
             "textSemantic" -> {} // green/red state colours owned by updateUI
             else -> when {

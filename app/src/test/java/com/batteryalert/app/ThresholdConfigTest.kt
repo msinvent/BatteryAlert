@@ -63,6 +63,22 @@ class ThresholdConfigTest {
     }
 
     @Test
+    fun `saving seeds already-crossed thresholds as fired so a save never rings`() {
+        val config = ThresholdConfig(high = 20, mid = 15, low = 10)
+        // Battery above everything: all armed.
+        assertTrue(config.firedFlagsAt(50) == Triple(false, false, false))
+        // At 16%: the 20% alert would have rung already — seeded fired;
+        // 15% and 10% still armed for their crossings.
+        assertTrue(config.firedFlagsAt(16) == Triple(true, false, false))
+        // At 12%: 20 and 15 seeded fired, 10 still armed.
+        assertTrue(config.firedFlagsAt(12) == Triple(true, true, false))
+        // At 8%: everything seeded — no siren from saving at critical level.
+        assertTrue(config.firedFlagsAt(8) == Triple(true, true, true))
+        // Boundary: exactly at a threshold counts as crossed.
+        assertTrue(config.firedFlagsAt(15) == Triple(true, true, false))
+    }
+
+    @Test
     fun `siren choices cycle in order and wrap around`() {
         assertTrue(ThresholdConfig.nextSirenChoice(15) == 30)
         assertTrue(ThresholdConfig.nextSirenChoice(30) == 45)

@@ -47,7 +47,7 @@
     <string name="siren_length_format">%1$ds siren</string>
     <string name="error_thresholds">✗ Use 5–95%%, descending, at least 5%% apart</string>
     <string name="btn_save_thresholds">SAVE THRESHOLDS</string>
-    <string name="toast_thresholds_saved">Thresholds updated — alerts re-armed</string>
+    <string name="toast_thresholds_saved">Thresholds saved — alerts arm at the next crossing</string>
 
     <!-- Deep Sleep Section -->
     <string name="deep_sleep_label">DEEP SLEEP</string>

@@ -24,6 +24,15 @@ data class ThresholdConfig(
         midSirenSec in SIREN_CHOICES_SEC &&
         lowSirenSec in SIREN_CHOICES_SEC
 
+    /**
+     * Fired-flags to seed when this config is saved: thresholds the battery
+     * is already at or below count as fired, so saving settings never sounds
+     * the siren — each alert arms for the NEXT downward crossing (or after
+     * charging above the re-arm margin).
+     */
+    fun firedFlagsAt(batteryPct: Int): Triple<Boolean, Boolean, Boolean> =
+        Triple(batteryPct <= high, batteryPct <= mid, batteryPct <= low)
+
     companion object {
         const val MIN_GAP = 5
         const val MIN_PERCENT = 5
